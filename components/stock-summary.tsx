@@ -45,6 +45,25 @@ interface StockData {
   metrics?: CompanyMetrics;
 }
 
+// Add this function before the StockSummary component
+async function fetchStockSummary(symbol: string): Promise<StockSummaryData | null> {
+  const summaryResponse = await fetch(`/api/summary?query=${symbol}`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  if (!summaryResponse.ok) {
+    throw new Error("Failed to fetch summary data");
+  }
+
+  const summaryData = await summaryResponse.json();
+  return summaryData.object
+    ? JSON.parse(JSON.parse(summaryData.object).data[0])[symbol] as StockSummaryData
+    : null;
+}
+
 export default function StockSummary({
   symbol,
   initialData,
@@ -63,26 +82,8 @@ export default function StockSummary({
 
       try {
         console.log("fetching data");
-        // Fetch summary data
-        const summaryResponse = await fetch(`/api/summary?query=${symbol}`, {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-          },
-        });
-
-        if (!summaryResponse.ok) {
-          throw new Error("Failed to fetch summary data");
-        }
-
-        console.log("summary data fetched");
-
-        const summaryData = await summaryResponse.json();
-        const stockSummary = summaryData.object
-          ? (JSON.parse(JSON.parse(summaryData.object).data[0])[
-              symbol
-            ] as StockSummaryData)
-          : null;
+        // Use the new function
+        const stockSummary = await fetchStockSummary(symbol);
 
         // Fetch company metrics
         const metricsQuery = {
