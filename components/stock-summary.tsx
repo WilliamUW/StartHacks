@@ -53,7 +53,9 @@ interface MetricsResponse {
 }
 
 // Add this function before the StockSummary component
-async function fetchStockSummary(symbol: string): Promise<StockSummaryData | null> {
+async function fetchStockSummary(
+  symbol: string
+): Promise<StockSummaryData | null> {
   const summaryResponse = await fetch(`/api/summary?query=${symbol}`, {
     method: "POST",
     headers: {
@@ -67,31 +69,41 @@ async function fetchStockSummary(symbol: string): Promise<StockSummaryData | nul
 
   const summaryData = await summaryResponse.json();
   return summaryData.object
-    ? JSON.parse(JSON.parse(summaryData.object).data[0])[symbol] as StockSummaryData
+    ? (JSON.parse(JSON.parse(summaryData.object).data[0])[
+        symbol
+      ] as StockSummaryData)
     : null;
 }
 
-async function fetchCompanyMetrics(symbol: string): Promise<MetricsResponse> {
+async function fetchCompanyMetrics(
+  symbol: string,
+  metric: string,
+  year: string
+): Promise<MetricsResponse> {
   const metricsQuery = {
-    [symbol]: "eps|2025",
-    [symbol]: "dividend|2025",
-    [symbol]: "market cap|2025",
-    [symbol]: "earnings|2025"
+    [symbol]: `${metric}|${year}`,
   };
 
-  const metricsResponse = await fetch(`/api/companydatasearch?query=${encodeURIComponent(JSON.stringify(metricsQuery))}`, {
-    method: "POST",
-    headers: {
-      accept: "application/json",
-    },
-  });
+  const metricsResponse = await fetch(
+    `/api/companydatasearch?query=${encodeURIComponent(
+      JSON.stringify(metricsQuery)
+    )}`,
+    {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+      },
+    }
+  );
 
   if (!metricsResponse.ok) {
     throw new Error("Failed to fetch company metrics");
   }
 
   const metricsData = await metricsResponse.json();
-  return JSON.parse(JSON.parse(metricsData.object).data[0]);
+
+  const json = JSON.parse(JSON.parse(metricsData.object).data[0]);
+  return json;
 }
 
 export default function StockSummary({
@@ -114,9 +126,19 @@ export default function StockSummary({
         console.log("fetching data");
         const stockSummary = await fetchStockSummary(symbol);
         console.log("stock summary", stockSummary);
-        const parsedMetrics = await fetchCompanyMetrics(symbol);
+        const parsedMetrics = await fetchCompanyMetrics(
+          symbol,
+          "dividend",
+          "2025"
+        );
         console.log("parsed metrics", parsedMetrics);
-        
+        const dividendMetric = await fetchCompanyMetrics(
+          symbol,
+          "dividend",
+          "2025"
+        );
+        console.log("parsed metrics", dividendMetric);
+
         if (stockSummary) {
           setStock((prevStock) => ({
             ...prevStock,
@@ -133,11 +155,17 @@ export default function StockSummary({
                 1e12
               ).toFixed(2) + "T",
             metrics: {
-              eps: parsedMetrics["Fundamentals quarter 1 - Net Profit"]?.[0] || "N/A",
-              dividend: parsedMetrics["Fundamentals annual 2 - Net Profit"]?.[0] || "N/A",
-              marketCap: parsedMetrics["Fundamentals quarter 2 - Net Profit"]?.[0] || "N/A",
-              earnings: parsedMetrics["Fundamentals quarter 12 - Net Profit"]?.[0] || "N/A"
-            }
+              eps:
+                parsedMetrics["Fundamentals quarter 1 - Net Profit"]?.[0] ||
+                "N/A",
+              dividend: dividendMetric["Dividend Yield (SIX)"][0] || "N/A",
+              marketCap:
+                parsedMetrics["Fundamentals quarter 2 - Net Profit"]?.[0] ||
+                "N/A",
+              earnings:
+                parsedMetrics["Fundamentals quarter 12 - Net Profit"]?.[0] ||
+                "N/A",
+            },
           }));
         }
       } catch (err) {
@@ -186,13 +214,17 @@ export default function StockSummary({
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Dividend (2025)</div>
+              <div className="text-xs text-muted-foreground">
+                Dividend (2025)
+              </div>
               <div className="text-sm font-medium">
-                ${stock.metrics?.dividend || "N/A"}
+                {stock.metrics?.dividend || "N/A"}%
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Market Cap (2025)</div>
+              <div className="text-xs text-muted-foreground">
+                Market Cap (2025)
+              </div>
               <div className="text-sm font-medium">
                 ${stock.marketCap || "N/A"}
               </div>
