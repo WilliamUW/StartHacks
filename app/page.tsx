@@ -462,8 +462,9 @@ export default function Home() {
     ) {
       handleFinancialAdviceRequest();
     } else if (lowerMessage.includes("sell")) {
-      handleClientTransactionRequest("Shares of AAPL has been sold")
-
+      handleClientTransactionRequest("Shares of AAPL has been sold");
+    } else if (lowerMessage.includes("transfer")) {
+      handleClientTransactionRequest("Shares of AAPL have been transfered");
     } else {
       // Generic response
       const response = await fetch('/api/llm', {
