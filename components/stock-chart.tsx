@@ -337,7 +337,7 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
         case "5Y":
           label =
             ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
-              currentDate.getMonth()
+            currentDate.getMonth()
             ] +
             " " +
             currentDate.getFullYear()
@@ -368,8 +368,8 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
       case "5Y":
         labels.push(
           ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][now.getMonth()] +
-            " " +
-            now.getFullYear(),
+          " " +
+          now.getFullYear(),
         )
         break
     }
@@ -383,4 +383,3 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     </div>
   )
 }
-
