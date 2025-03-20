@@ -124,19 +124,12 @@ export default function StockSummary({
 
       try {
         console.log("fetching data");
-        const stockSummary = await fetchStockSummary(symbol);
-        console.log("stock summary", stockSummary);
-        const earningsMetrics = await fetchCompanyMetrics(
-          symbol,
-          "earnings",
-          "2025"
-        );
-        const dividendMetric = await fetchCompanyMetrics(
-          symbol,
-          "dividend",
-          "2025"
-        );
-        const epsMetric = await fetchCompanyMetrics(symbol, "eps", "2025");
+        const [stockSummary, earningsMetrics, dividendMetric, epsMetric] = await Promise.all([
+          fetchStockSummary(symbol),
+          fetchCompanyMetrics(symbol, "earnings", "2025"),
+          fetchCompanyMetrics(symbol, "dividend", "2025"),
+          fetchCompanyMetrics(symbol, "eps", "2025")
+        ]);
 
         if (stockSummary) {
           setStock((prevStock) => ({
