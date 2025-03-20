@@ -412,7 +412,7 @@ export default function Home() {
         };
         setMessages((prev) => [...prev, agentMessage]);
         setIsLoading(false);
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -718,10 +718,10 @@ export default function Home() {
 
             setMessages((prev) => [...prev, stockInfoMessage]);
             setIsLoading(false);
-          }, 300);
-        }, 500);
-      }, 500);
-    }, 500);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    }, 1000);
   };
 
   const handlePortfolioRequest = () => {
@@ -901,10 +901,10 @@ export default function Home() {
 
             setMessages((prev) => [...prev, portfolioInfoMessage]);
             setIsLoading(false);
-          }, 300);
-        }, 500);
-      }, 500);
-    }, 500);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    }, 1000);
   };
 
   const handleExcelRequest = () => {
@@ -1031,8 +1031,7 @@ export default function Home() {
           setTimeout(() => {
             const excelPreviewMessage: Message = {
               id: uuidv4(),
-              content:
-                "I've generated a comprehensive Excel report for John Smith's portfolio:",
+              content: "I've generated a comprehensive Excel report for John Smith's portfolio:",
               type: "excel-preview",
               sender: "agent",
               timestamp: new Date(),
@@ -1058,10 +1057,10 @@ export default function Home() {
 
             setMessages((prev) => [...prev, excelPreviewMessage]);
             setIsLoading(false);
-          }, 300);
-        }, 500);
-      }, 500);
-    }, 500);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    }, 1000);
   };
 
   // Update the handlePowerPointRequest function to accept a client name parameter
@@ -1272,8 +1271,7 @@ export default function Home() {
           setTimeout(() => {
             const financialAdviceMessage: Message = {
               id: uuidv4(),
-              content:
-                "Based on my analysis, here's my recommendation regarding Apple stock (AAPL):",
+              content: "Based on my analysis, here's my recommendation regarding Apple stock (AAPL):",
               type: "financial-advice",
               sender: "agent",
               timestamp: new Date(),
@@ -1301,10 +1299,10 @@ export default function Home() {
 
             setMessages((prev) => [...prev, financialAdviceMessage]);
             setIsLoading(false);
-          }, 300);
-        }, 500);
-      }, 500);
-    }, 500);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    }, 1000);
   };
 
   // Update the handleInputChange function
