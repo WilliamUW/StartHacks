@@ -113,8 +113,9 @@ export default function StockSummary({
       try {
         console.log("fetching data");
         const stockSummary = await fetchStockSummary(symbol);
+        console.log("stock summary", stockSummary);
         const parsedMetrics = await fetchCompanyMetrics(symbol);
-
+        console.log("parsed metrics", parsedMetrics);
         if (stockSummary) {
           setStock((prevStock) => ({
             ...prevStock,
@@ -122,7 +123,7 @@ export default function StockSummary({
             open: parseFloat(stockSummary.open),
             high: parseFloat(stockSummary.high),
             low: parseFloat(stockSummary.low),
-            volume: parseInt(stockSummary.vol),
+            volume: parseInt(stockSummary.vol) * 1000,
             price: stockSummary.close,
             marketCap:
               (
@@ -226,7 +227,7 @@ export default function StockSummary({
             <div>
               <div className="text-xs text-muted-foreground">Volume</div>
               <div className="text-sm font-medium">
-                {(stock.volume / 1000000).toFixed(1)}M
+                ${(stock.volume / 1000000).toFixed(1)}M
               </div>
             </div>
           </div>
