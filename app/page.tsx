@@ -1,8 +1,5 @@
 "use client";
 
-import NotificationCenter from "@/components/notification-center"
-
-import { useState, useEffect, useRef } from "react"
 import {
   AlertCircle,
   BarChart4,
@@ -28,11 +25,13 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import NotificationCenter from "@/components/notification-center"
 import PortfolioChart from "@/components/portfolio-chart";
 import PortfolioPieChart from "@/components/portfolio-pie-chart";
 import type React from "react";
@@ -79,6 +78,12 @@ interface SuggestedCommand {
   description: string;
   icon: React.ReactNode;
   category: string;
+}
+
+// Add this type near other interfaces
+interface SpeechRecognitionWindow extends Window {
+  webkitSpeechRecognition?: typeof SpeechRecognition;
+  SpeechRecognition?: typeof SpeechRecognition;
 }
 
 export default function Home() {
@@ -302,29 +307,61 @@ export default function Home() {
     }
   }, [voiceMode]);
 
-  // Update the toggleVoiceMode function to automatically show voice commands
-  const toggleVoiceMode = () => {
+  // Update the toggleVoiceMode function
+  const toggleVoiceMode = useCallback(() => {
     if (voiceMode === "idle") {
-      setVoiceMode("listening");
-      // Simulate voice recognition after 3 seconds
-      setTimeout(() => {
+      // Initialize speech recognition
+      const SpeechRecognition = (window as SpeechRecognitionWindow).SpeechRecognition || 
+                               (window as SpeechRecognitionWindow).webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser.");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setVoiceMode("listening");
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
         setVoiceMode("processing");
-        // Simulate processing for 1.5 seconds
+        
+        // Process the voice input
         setTimeout(() => {
-          // Add a simulated voice message
-          handleUserMessage("Show me John Smith's portfolio performance");
+          handleUserMessage(transcript);
           setVoiceMode("speaking");
 
-          // Simulate AI speaking for 3 seconds
+          // Simulate AI speaking for 2 seconds
           setTimeout(() => {
             setVoiceMode("idle");
-          }, 1000);
+          }, 2000);
         }, 500);
-      }, 1000);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setVoiceMode("idle");
+      };
+
+      recognition.onend = () => {
+        // Only set to idle if we're still in listening mode
+        // This prevents overriding the "processing" or "speaking" states
+        if (voiceMode === "listening") {
+          setVoiceMode("idle");
+        }
+      };
+
+      recognition.start();
     } else {
       setVoiceMode("idle");
     }
-  };
+  }, [voiceMode]);
 
   // Add this function to toggle voice commands visibility
   const toggleVoiceCommands = () => {
@@ -1950,6 +1987,14 @@ export default function Home() {
     setIsInputCollapsed((prev) => !prev);
   };
 
+  // Add this helper function
+  const isSpeechRecognitionSupported = () => {
+    return !!(
+      (window as SpeechRecognitionWindow).SpeechRecognition ||
+      (window as SpeechRecognitionWindow).webkitSpeechRecognition
+    );
+  };
+
   return (
     <main className="flex flex-col h-screen bg-background text-foreground">
       {/* Main content area */}
@@ -1981,18 +2026,28 @@ export default function Home() {
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
               <Button
                 size="lg"
-                className="h-14 px-6 rounded-full transition-all duration-150 shadow-lg bg-primary text-primary-foreground hover:bg-primary/90" // Changed from duration-300
-                onClick={toggleVoiceMode}
-              >
-                {voiceMode === "idle" ? (
-                  <Mic className="h-16 w-16" />
-                ) : voiceMode === "listening" ? (
-                  <Mic className="h-16 w-16" />
-                ) : voiceMode === "processing" ? (
-                  <Loader2 className="h-16 w-16 animate-spin" />
-                ) : (
-                  <Volume2 className="h-16 w-16" />
+                className={cn(
+                  "h-14 px-6 rounded-full transition-all duration-150 shadow-lg",
+                  isSpeechRecognitionSupported() 
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
+                onClick={isSpeechRecognitionSupported() ? toggleVoiceMode : () => alert("Speech recognition is not supported in this browser.")}
+              >
+                <div className="flex items-center">
+                  <Mic className="h-5 w-5" />
+                  <span className="ml-2 font-medium">
+                    {!isSpeechRecognitionSupported() 
+                      ? "Speech not supported"
+                      : voiceMode === "idle"
+                      ? "Speak to Terminal Six"
+                      : voiceMode === "listening"
+                      ? "Listening..."
+                      : voiceMode === "processing"
+                      ? "Processing..."
+                      : "Speaking..."}
+                  </span>
+                </div>
               </Button>
             </div>
 
