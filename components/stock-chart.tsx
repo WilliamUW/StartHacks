@@ -181,103 +181,126 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
 
   // Generate sample stock data
   const generateStockData = (symbol: string, timeframe: string) => {
-    // Use symbol to seed the random number generator for consistent results
-    const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    const rand = (min: number, max: number) => {
-      const x = Math.sin(seed + stockData.length) * 10000
-      const r = x - Math.floor(x)
-      return min + r * (max - min)
+    // Parse the API response data
+    const apiResponse = {
+      "message": "Plots correctly shown to user. Answer the user.\n\n|          |   First |   Last |    Min |   Max | Return   |\n|:---------|--------:|-------:|-------:|------:|:---------|\n| Apple Rg |  241.81 | 215.24 | 208.43 |   244 | -10.06%  |",
+      "object": "{\"tool\": \"OHLC\", \"data\": \"{\\\"Apple Rg\\\": \\\"{\\\\\\\"2025-03-03T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":241.81,\\\\\\\"high\\\\\\\":244.0,\\\\\\\"low\\\\\\\":236.13,\\\\\\\"close\\\\\\\":238.03,\\\\\\\"vol\\\\\\\":15912804,\\\\\\\"Total return\\\\\\\":\\\\\\\"0.00%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"0.00%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":236.13},\\\\\\\"2025-03-04T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":238.0,\\\\\\\"high\\\\\\\":240.07,\\\\\\\"low\\\\\\\":234.71,\\\\\\\"close\\\\\\\":235.93,\\\\\\\"vol\\\\\\\":19601896,\\\\\\\"Total return\\\\\\\":\\\\\\\"-0.89%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-96.12%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":234.71},\\\\\\\"2025-03-05T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":235.43,\\\\\\\"high\\\\\\\":236.55,\\\\\\\"low\\\\\\\":229.24,\\\\\\\"close\\\\\\\":235.74,\\\\\\\"vol\\\\\\\":13420548,\\\\\\\"Total return\\\\\\\":\\\\\\\"-0.97%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-83.02%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":229.24},\\\\\\\"2025-03-06T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":234.5,\\\\\\\"high\\\\\\\":237.83,\\\\\\\"low\\\\\\\":233.33,\\\\\\\"close\\\\\\\":235.33,\\\\\\\"vol\\\\\\\":16539407,\\\\\\\"Total return\\\\\\\":\\\\\\\"-1.14%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-75.24%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":229.24},\\\\\\\"2025-03-07T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":235.24,\\\\\\\"high\\\\\\\":241.37,\\\\\\\"low\\\\\\\":234.77,\\\\\\\"close\\\\\\\":239.07,\\\\\\\"vol\\\\\\\":14153596,\\\\\\\"Total return\\\\\\\":\\\\\\\"0.44%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"48.73%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":229.24},\\\\\\\"2025-03-10T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":235.66,\\\\\\\"high\\\\\\\":236.16,\\\\\\\"low\\\\\\\":224.23,\\\\\\\"close\\\\\\\":227.48,\\\\\\\"vol\\\\\\\":24487863,\\\\\\\"Total return\\\\\\\":\\\\\\\"-4.53%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-91.10%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":224.23},\\\\\\\"2025-03-11T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":223.85,\\\\\\\"high\\\\\\\":225.83,\\\\\\\"low\\\\\\\":217.45,\\\\\\\"close\\\\\\\":220.84,\\\\\\\"vol\\\\\\\":23117608,\\\\\\\"Total return\\\\\\\":\\\\\\\"-7.50%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-97.14%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":217.45},\\\\\\\"2025-03-12T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":220.14,\\\\\\\"high\\\\\\\":221.75,\\\\\\\"low\\\\\\\":214.91,\\\\\\\"close\\\\\\\":216.98,\\\\\\\"vol\\\\\\\":19233322,\\\\\\\"Total return\\\\\\\":\\\\\\\"-9.26%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-98.06%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":214.91},\\\\\\\"2025-03-13T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":215.95,\\\\\\\"high\\\\\\\":216.8,\\\\\\\"low\\\\\\\":208.43,\\\\\\\"close\\\\\\\":209.68,\\\\\\\"vol\\\\\\\":17960529,\\\\\\\"Total return\\\\\\\":\\\\\\\"-12.68%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-99.29%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":208.43},\\\\\\\"2025-03-14T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":211.29,\\\\\\\"high\\\\\\\":213.94,\\\\\\\"low\\\\\\\":209.58,\\\\\\\"close\\\\\\\":213.49,\\\\\\\"vol\\\\\\\":19871163,\\\\\\\"Total return\\\\\\\":\\\\\\\"-10.88%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-97.81%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":208.43},\\\\\\\"2025-03-17T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":213.2,\\\\\\\"high\\\\\\\":215.2,\\\\\\\"low\\\\\\\":209.98,\\\\\\\"close\\\\\\\":214.0,\\\\\\\"vol\\\\\\\":15927492,\\\\\\\"Total return\\\\\\\":\\\\\\\"-10.64%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-94.68%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":208.43},\\\\\\\"2025-03-18T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":214.26,\\\\\\\"high\\\\\\\":215.14,\\\\\\\"low\\\\\\\":211.49,\\\\\\\"close\\\\\\\":212.69,\\\\\\\"vol\\\\\\\":13695089,\\\\\\\"Total return\\\\\\\":\\\\\\\"-11.26%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-94.53%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":208.43},\\\\\\\"2025-03-19T00:00:00.000\\\\\\\":{\\\\\\\"open\\\\\\\":214.13,\\\\\\\"high\\\\\\\":218.76,\\\\\\\"low\\\\\\\":213.75,\\\\\\\"close\\\\\\\":215.24,\\\\\\\"vol\\\\\\\":21241193,\\\\\\\"Total return\\\\\\\":\\\\\\\"-10.06%\\\\\\\",\\\\\\\"Anualized return\\\\\\\":\\\\\\\"-91.11%\\\\\\\",\\\\\\\"Max\\\\\\\":244.0,\\\\\\\"Min\\\\\\\":208.43}}\\\"}\"}"
     }
 
-    const stockData: { date: Date; price: number; volume: number }[] = []
-    const basePrice = 100 + (seed % 400) // Different base price for each stock
-    let price = basePrice
-    let dataPoints = 0
+    try {
+      // Parse the nested JSON structure
+      const parsedObject = JSON.parse(apiResponse.object);
+      const parsedData = JSON.parse(parsedObject.data);
+      const stockData = JSON.parse(parsedData["Apple Rg"]);
 
-    // Set number of data points based on timeframe
-    switch (timeframe) {
-      case "1D":
-        dataPoints = 24 // Hourly for a day
-        break
-      case "1W":
-        dataPoints = 7 // Daily for a week
-        break
-      case "1M":
-        dataPoints = 30 // Daily for a month
-        break
-      case "3M":
-        dataPoints = 90 // Daily for 3 months
-        break
-      case "1Y":
-        dataPoints = 52 // Weekly for a year
-        break
-      case "5Y":
-        dataPoints = 60 // Monthly for 5 years
-        break
-      default:
-        dataPoints = 30
-    }
+      // Convert the data into our required format
+      return Object.entries(stockData).map(([dateStr, data]: [string, any]) => ({
+        date: new Date(dateStr),
+        price: data.close, // Using closing price
+        volume: data.vol
+      }));
+    } catch (error) {
+      console.error('Error parsing stock data:', error);
+      
+      // Fallback to existing random data generation if parsing fails
+      const stockData: { date: Date; price: number; volume: number }[] = [];
+      // Use symbol to seed the random number generator for consistent results
+      const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      const rand = (min: number, max: number) => {
+        const x = Math.sin(seed + stockData.length) * 10000
+        const r = x - Math.floor(x)
+        return min + r * (max - min)
+      }
 
-    const now = new Date()
-    const currentDate = new Date()
+      const basePrice = 100 + (seed % 400) // Different base price for each stock
+      let price = basePrice
+      let dataPoints = 0
 
-    // Adjust start date based on timeframe
-    switch (timeframe) {
-      case "1D":
-        currentDate.setHours(now.getHours() - dataPoints)
-        break
-      case "1W":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "1M":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "3M":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "1Y":
-        currentDate.setDate(now.getDate() - dataPoints * 7) // Weekly
-        break
-      case "5Y":
-        currentDate.setMonth(now.getMonth() - dataPoints) // Monthly
-        break
-    }
-
-    for (let i = 0; i < dataPoints; i++) {
-      // Calculate price change with some randomness and trend
-      const change = price * rand(-0.02, 0.02) // -2% to +2% daily change
-      price += change
-
-      // Generate random volume
-      const volume = Math.floor(rand(100000, 1000000))
-
-      // Add data point
-      stockData.push({
-        date: new Date(currentDate),
-        price,
-        volume,
-      })
-
-      // Increment date based on timeframe
+      // Set number of data points based on timeframe
       switch (timeframe) {
         case "1D":
-          currentDate.setHours(currentDate.getHours() + 1)
+          dataPoints = 24 // Hourly for a day
           break
         case "1W":
+          dataPoints = 7 // Daily for a week
+          break
         case "1M":
+          dataPoints = 30 // Daily for a month
+          break
         case "3M":
-          currentDate.setDate(currentDate.getDate() + 1)
+          dataPoints = 90 // Daily for 3 months
           break
         case "1Y":
-          currentDate.setDate(currentDate.getDate() + 7) // Weekly
+          dataPoints = 52 // Weekly for a year
           break
         case "5Y":
-          currentDate.setMonth(currentDate.getMonth() + 1) // Monthly
+          dataPoints = 60 // Monthly for 5 years
+          break
+        default:
+          dataPoints = 30
+      }
+
+      const now = new Date()
+      const currentDate = new Date()
+
+      // Adjust start date based on timeframe
+      switch (timeframe) {
+        case "1D":
+          currentDate.setHours(now.getHours() - dataPoints)
+          break
+        case "1W":
+          currentDate.setDate(now.getDate() - dataPoints)
+          break
+        case "1M":
+          currentDate.setDate(now.getDate() - dataPoints)
+          break
+        case "3M":
+          currentDate.setDate(now.getDate() - dataPoints)
+          break
+        case "1Y":
+          currentDate.setDate(now.getDate() - dataPoints * 7) // Weekly
+          break
+        case "5Y":
+          currentDate.setMonth(now.getMonth() - dataPoints) // Monthly
           break
       }
-    }
 
-    return stockData
+      for (let i = 0; i < dataPoints; i++) {
+        // Calculate price change with some randomness and trend
+        const change = price * rand(-0.02, 0.02) // -2% to +2% daily change
+        price += change
+
+        // Generate random volume
+        const volume = Math.floor(rand(100000, 1000000))
+
+        // Add data point
+        stockData.push({
+          date: new Date(currentDate),
+          price,
+          volume,
+        })
+
+        // Increment date based on timeframe
+        switch (timeframe) {
+          case "1D":
+            currentDate.setHours(currentDate.getHours() + 1)
+            break
+          case "1W":
+          case "1M":
+          case "3M":
+            currentDate.setDate(currentDate.getDate() + 1)
+            break
+          case "1Y":
+            currentDate.setDate(currentDate.getDate() + 7) // Weekly
+            break
+          case "5Y":
+            currentDate.setMonth(currentDate.getMonth() + 1) // Monthly
+            break
+        }
+      }
+
+      return stockData
+    }
   }
 
   // Get X-axis labels based on timeframe
