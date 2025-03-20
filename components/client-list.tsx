@@ -110,12 +110,12 @@ export default function ClientList() {
             <div className="h-8 w-8 mr-2">
               <img
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/monkeyy-AUgmriMSYzYWjIC2RQIjNlDwE6WVdE.png"
-                alt="Terminal Six Logo"
+                alt="Terminal SIX Logo"
                 className="h-full w-full object-contain dark:invert"
               />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">Terminal Six</h2>
+              <h2 className="text-xl font-semibold">Terminal SIX</h2>
               <p className="text-xs text-muted-foreground">Wealth Management</p>
             </div>
           </div>

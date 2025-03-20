@@ -46,7 +46,7 @@ export default function AgentInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello, I'm Terminal Six AI. How can I assist you with Jane Appleseed's portfolio today?",
+      content: "Hello, I'm Terminal SIX AI. How can I assist you with Jane Appleseed's portfolio today?",
       sender: "agent",
       timestamp: new Date(),
     },
@@ -304,7 +304,7 @@ export default function AgentInterface() {
             ],
             totalSlides: 12,
             features: [
-              "Professional design with Terminal Six branding",
+              "Professional design with Terminal SIX branding",
               "Interactive charts and data visualizations",
               "Executive summary with key metrics",
               "Strategic recommendations section",
@@ -568,7 +568,7 @@ export default function AgentInterface() {
         <div className="flex items-center justify-between px-4 py-2 border-b border-border flex-shrink-0">
           <div className="flex items-center">
             <Sparkles className="h-5 w-5 text-primary mr-2" />
-            <h3 className="font-medium">Terminal Six AI</h3>
+            <h3 className="font-medium">Terminal SIX AI</h3>
           </div>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" onClick={() => setIsExpanded(!isExpanded)}>
@@ -648,12 +648,12 @@ export default function AgentInterface() {
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {voiceMode === "idle"
-                        ? "Ask Terminal Six about Jane's portfolio"
+                        ? "Ask Terminal SIX about Jane's portfolio"
                         : voiceMode === "listening"
                           ? "Say something like 'Show me portfolio performance'"
                           : voiceMode === "processing"
                             ? "Analyzing your request"
-                            : "Terminal Six is responding"}
+                            : "Terminal SIX is responding"}
                     </p>
                   </div>
 
@@ -735,7 +735,7 @@ export default function AgentInterface() {
                       </Button>
                       <div className="relative flex-1">
                         <Input
-                          placeholder="Ask Terminal Six..."
+                          placeholder="Ask Terminal SIX..."
                           value={inputValue}
                           onChange={(e) => setInputValue(e.target.value)}
                           onKeyDown={handleKeyDown}
@@ -753,7 +753,7 @@ export default function AgentInterface() {
                       </div>
                     </div>
                     <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-                      <div>Powered by Six AI</div>
+                      <div>Powered by SIX AI</div>
                       <div className="flex items-center">
                         <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
                           Suggested: Rebalance portfolio

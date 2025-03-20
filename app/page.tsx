@@ -94,7 +94,7 @@ export default function Home() {
     {
       id: "welcome",
       content:
-        "Hello, I'm Terminal Six AI. How can I assist you with your financial decisions today?",
+        "Hello, I'm Terminal SIX AI. How can I assist you with your financial decisions today?",
       type: "text",
       sender: "agent",
       timestamp: new Date(),
@@ -1281,7 +1281,7 @@ export default function Home() {
             ],
             totalSlides: 12,
             features: [
-              "Professional design with Terminal Six branding",
+              "Professional design with Terminal SIX branding",
               "Interactive charts and data visualizations",
               "Executive summary with key metrics",
               "Strategic recommendations section",
@@ -2169,7 +2169,7 @@ export default function Home() {
                     {!isSpeechRecognitionSupported()
                       ? "Speech not supported"
                       : voiceMode === "idle"
-                      ? "Speak to Terminal Six"
+                      ? "Speak to Terminal SIX"
                       : voiceMode === "listening"
                       ? "Listening..."
                       : voiceMode === "processing"
@@ -2254,12 +2254,12 @@ export default function Home() {
             <div className="h-8 w-8 mr-2">
               <img
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/monkeyy-AUgmriMSYzYWjIC2RQIjNlDwE6WVdE.png"
-                alt="Terminal Six Logo"
+                alt="Terminal SIX Logo"
                 className="h-full w-full object-contain dark:invert"
               />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">Terminal Six</h2>
+              <h2 className="text-xl font-semibold">Terminal SIX</h2>
               <p className="text-xs text-muted-foreground">
                 AI Financial Assistant
               </p>
@@ -2308,7 +2308,7 @@ export default function Home() {
                   {message.sender === "agent" && (
                     <div className="flex items-center mb-2">
                       <Sparkles className="h-4 w-4 text-primary mr-2" />
-                      <span className="font-medium">Terminal Six AI</span>
+                      <span className="font-medium">Terminal SIX AI</span>
                     </div>
                   )}
 
@@ -2334,7 +2334,7 @@ export default function Home() {
                 <div className="bg-card border border-border rounded-lg p-4">
                   <div className="flex items-center">
                     <Sparkles className="h-4 w-4 text-primary mr-2" />
-                    <span className="font-medium">Terminal Six AI</span>
+                    <span className="font-medium">Terminal SIX AI</span>
                   </div>
                   <div className="flex items-center mt-2">
                     <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
@@ -2386,7 +2386,7 @@ export default function Home() {
                       <Mic className="h-5 w-5" />
                       <span className="ml-2 font-medium">
                         {voiceMode === "idle"
-                          ? "Speak to Terminal Six"
+                          ? "Speak to Terminal SIX"
                           : voiceMode === "listening"
                           ? "Listening..."
                           : voiceMode === "processing"
@@ -2576,7 +2576,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-                  <div>Powered by Terminal Six AI</div>
+                  <div>Powered by Terminal SIX AI</div>
                   <div>Type / for commands or use voice</div>
                 </div>
               </div>

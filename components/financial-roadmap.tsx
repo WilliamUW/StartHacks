@@ -1,36 +1,37 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
+import {
+  Baby,
+  Briefcase,
+  Calendar,
+  Car,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  Edit,
+  GraduationCap,
+  Heart,
+  Home,
+  PiggyBank,
+  Plane,
+  Plus,
+  Sailboat,
+  Target,
+  Trash2,
+} from "lucide-react"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useRef, useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Home,
-  GraduationCap,
-  Briefcase,
-  Car,
-  Baby,
-  Plane,
-  Heart,
-  Sailboat,
-  PiggyBank,
-  Plus,
-  Trash2,
-  Calendar,
-  DollarSign,
-  Target,
-  ChevronRight,
-  ChevronLeft,
-  Edit,
-  Check,
-} from "lucide-react"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 import { useTheme } from "@/components/theme-provider"
 
 // Define milestone types and interfaces
@@ -101,7 +102,7 @@ const defaultMilestones: Milestone[] = [
     year: 2027,
     amount: 50000,
     progress: 45,
-    description: "Six-month sabbatical to travel the world",
+    description: "SIX-month sabbatical to travel the world",
     completed: false,
     color: "#f59e0b", // amber
   },

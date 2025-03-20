@@ -1,27 +1,28 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
+  ArrowUpRight,
+  BarChart4,
+  Calendar,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
   Download,
   FileType,
-  Check,
-  X,
-  ChevronRight,
-  ChevronLeft,
-  BarChart4,
-  PieChart,
-  TrendingUp,
-  Target,
   Lightbulb,
-  DollarSign,
   Percent,
-  ArrowUpRight,
-  Calendar,
+  PieChart,
   Shield,
+  Target,
+  TrendingUp,
+  X,
 } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 export default function PowerPointIntegration() {
   const [exportStatus, setExportStatus] = useState<"idle" | "generating" | "success" | "error">("idle")
