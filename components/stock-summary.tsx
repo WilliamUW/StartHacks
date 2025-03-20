@@ -45,6 +45,13 @@ interface StockData {
   metrics?: CompanyMetrics;
 }
 
+interface MetricsResponse {
+  "Fundamentals quarter 1 - Net Profit"?: string[];
+  "Fundamentals annual 2 - Net Profit"?: string[];
+  "Fundamentals quarter 2 - Net Profit"?: string[];
+  "Fundamentals quarter 12 - Net Profit"?: string[];
+}
+
 // Add this function before the StockSummary component
 async function fetchStockSummary(symbol: string): Promise<StockSummaryData | null> {
   const summaryResponse = await fetch(`/api/summary?query=${symbol}`, {
@@ -62,6 +69,29 @@ async function fetchStockSummary(symbol: string): Promise<StockSummaryData | nul
   return summaryData.object
     ? JSON.parse(JSON.parse(summaryData.object).data[0])[symbol] as StockSummaryData
     : null;
+}
+
+async function fetchCompanyMetrics(symbol: string): Promise<MetricsResponse> {
+  const metricsQuery = {
+    [symbol]: "eps|2025",
+    [symbol]: "dividend|2025",
+    [symbol]: "market cap|2025",
+    [symbol]: "earnings|2025"
+  };
+
+  const metricsResponse = await fetch(`/api/companydatasearch?query=${encodeURIComponent(JSON.stringify(metricsQuery))}`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  if (!metricsResponse.ok) {
+    throw new Error("Failed to fetch company metrics");
+  }
+
+  const metricsData = await metricsResponse.json();
+  return JSON.parse(JSON.parse(metricsData.object).data[0]);
 }
 
 export default function StockSummary({
@@ -82,34 +112,9 @@ export default function StockSummary({
 
       try {
         console.log("fetching data");
-        // Use the new function
         const stockSummary = await fetchStockSummary(symbol);
+        const parsedMetrics = await fetchCompanyMetrics(symbol);
 
-        // Fetch company metrics
-        const metricsQuery = {
-          [symbol]: "eps|2025",
-          [symbol]: "dividend|2025",
-          [symbol]: "market cap|2025",
-          [symbol]: "earnings|2025"
-        };
-
-        const metricsResponse = await fetch(`/api/companydatasearch?query=${encodeURIComponent(JSON.stringify(metricsQuery))}`, {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-          },
-        });
-        console.log("metrics response fetched");
-
-        if (!metricsResponse.ok) {
-          throw new Error("Failed to fetch company metrics");
-        }
-
-        const metricsData = await metricsResponse.json();
-        console.log(metricsData);
-        const parsedMetrics = JSON.parse(JSON.parse(metricsData.object).data[0]);
-        console.log(parsedMetrics);
-        // Update stock data with both summary and metrics
         if (stockSummary) {
           setStock((prevStock) => ({
             ...prevStock,
