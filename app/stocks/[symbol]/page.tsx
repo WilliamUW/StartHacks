@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import NewsCard from "@/components/news-card";
 import StockChart from "@/components/stock-chart";
+import StockSummary from "@/components/stock-summary";
 
 // Mock stock data
 export const stocksData = {
@@ -190,9 +191,32 @@ const clientPreferences = {
   regions: ["North America", "Europe", "Emerging Markets - Asia"],
 };
 
+export const initialStockPlaceholder = {
+  name: "Unknown Stock",
+  price: 0,
+  change: 0,
+  changePercent: 0,
+  open: 0,
+  high: 0,
+  low: 0,
+  volume: 0,
+  marketCap: "0",
+  peRatio: 0,
+  dividend: 0,
+  eps: 0,
+  sector: "Unknown",
+  industry: "Unknown",
+  socialCauses: [],
+  regions: [],
+  esgRating: "N/A",
+  carbonFootprint: "N/A",
+};
+
 export default function StockPage({ params }: { params: { symbol: string } }) {
   const symbol = params.symbol.toUpperCase();
-  const stock = stocksData[symbol as keyof typeof stocksData] || {
+  
+  // Get initial data from mock data or default values
+  const initialStock = stocksData[symbol as keyof typeof stocksData] || {
     name: "Unknown Stock",
     price: 0,
     change: 0,
@@ -212,28 +236,6 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
     esgRating: "N/A",
     carbonFootprint: "N/A",
   };
-
-  const isPositive = stock.change >= 0;
-
-  // Calculate social cause alignment with client preferences
-  const matchingSocialCauses =
-    stock.socialCauses?.filter((cause) =>
-      clientPreferences.socialCauses.includes(cause)
-    ) || [];
-
-  const socialAlignmentPercentage = Math.round(
-    (matchingSocialCauses.length / clientPreferences.socialCauses.length) * 100
-  );
-
-  // Calculate region alignment with client preferences
-  const matchingRegions =
-    stock.regions?.filter((region) =>
-      clientPreferences.regions.includes(region)
-    ) || [];
-
-  const regionAlignmentPercentage = Math.round(
-    (matchingRegions.length / clientPreferences.regions.length) * 100
-  );
 
   return (
     <main className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -295,73 +297,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Key Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Open</div>
-                      <div className="text-sm font-medium">
-                        ${stock.open.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">High</div>
-                      <div className="text-sm font-medium">
-                        ${stock.high.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Low</div>
-                      <div className="text-sm font-medium">
-                        ${stock.low.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">
-                        Volume
-                      </div>
-                      <div className="text-sm font-medium">
-                        {(stock.volume / 1000000).toFixed(1)}M
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">
-                        Market Cap
-                      </div>
-                      <div className="text-sm font-medium">
-                        ${stock.marketCap}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">
-                        P/E Ratio
-                      </div>
-                      <div className="text-sm font-medium">
-                        {stock.peRatio.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">
-                        Dividend
-                      </div>
-                      <div className="text-sm font-medium">
-                        ${stock.dividend.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">EPS</div>
-                      <div className="text-sm font-medium">
-                        ${stock.eps.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <StockSummary symbol={symbol} initialData={initialStock} />
 
               <Card>
                 <CardHeader className="pb-2">
@@ -376,20 +312,20 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                       <div className="flex items-center">
                         <div
                           className={`text-sm font-medium ${
-                            isPositive ? "text-green-500" : "text-red-500"
+                            initialStock.change >= 0 ? "text-green-500" : "text-red-500"
                           }`}
                         >
-                          {isPositive ? "+" : ""}
-                          {stock.changePercent.toFixed(2)}%
+                          {initialStock.change >= 0 ? "+" : ""}
+                          {initialStock.changePercent.toFixed(2)}%
                         </div>
                         <div className="w-24 h-2 bg-muted ml-2 rounded-full overflow-hidden">
                           <div
                             className={`h-full ${
-                              isPositive ? "bg-green-500" : "bg-red-500"
+                              initialStock.change >= 0 ? "bg-green-500" : "bg-red-500"
                             }`}
                             style={{
                               width: `${Math.min(
-                                Math.abs(stock.changePercent) * 5,
+                                Math.abs(initialStock.changePercent) * 5,
                                 100
                               )}%`,
                             }}
@@ -477,7 +413,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                       Social Causes
                     </div>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {stock.socialCauses?.map((cause, index) => (
+                      {initialStock.socialCauses?.map((cause: string, index: number) => (
                         <Badge
                           key={index}
                           variant="outline"
@@ -491,10 +427,6 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                         </Badge>
                       ))}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      <span className="font-medium">Alignment:</span>{" "}
-                      {socialAlignmentPercentage}% match with preferences
-                    </div>
                   </div>
 
                   <div>
@@ -502,7 +434,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                       Geographic Presence
                     </div>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {stock.regions?.map((region, index) => (
+                      {initialStock.regions?.map((region: string, index: number) => (
                         <Badge
                           key={index}
                           variant="outline"
@@ -516,10 +448,6 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                         </Badge>
                       ))}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      <span className="font-medium">Alignment:</span>{" "}
-                      {regionAlignmentPercentage}% match with preferences
-                    </div>
                   </div>
 
                   <div>
@@ -530,17 +458,17 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                       <Badge
                         variant="outline"
                         className={
-                          stock.esgRating === "A" || stock.esgRating === "A-"
+                          initialStock.esgRating === "A" || initialStock.esgRating === "A-"
                             ? "bg-green-500/10 text-green-500"
-                            : stock.esgRating?.startsWith("B")
+                            : initialStock.esgRating?.startsWith("B")
                             ? "bg-amber-500/10 text-amber-500"
                             : "bg-red-500/10 text-red-500"
                         }
                       >
-                        {stock.esgRating}
+                        {initialStock.esgRating}
                       </Badge>
                       <span className="text-xs text-muted-foreground ml-2">
-                        Carbon: {stock.carbonFootprint}
+                        Carbon: {initialStock.carbonFootprint}
                       </span>
                     </div>
                   </div>
@@ -558,13 +486,13 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
 
               <TabsContent value="news" className="space-y-4">
                 <NewsCard
-                  title={`${stock.name} Reports Strong Quarterly Earnings`}
+                  title={`${initialStock.name} Reports Strong Quarterly Earnings`}
                   source="Financial Times"
                   time="2 hours ago"
                   impact={`Positive for ${symbol} (Beat EPS by $0.12)`}
                 />
                 <NewsCard
-                  title={`${stock.industry} Sector Sees Increased Investment`}
+                  title={`${initialStock.industry} Sector Sees Increased Investment`}
                   source="Bloomberg"
                   time="1 day ago"
                   impact={`Potential upside for ${symbol} and peers`}
@@ -574,7 +502,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                   source="Wall Street Journal"
                   time="3 days ago"
                   impact={`New average price target: $${(
-                    stock.price * 1.15
+                    initialStock.price * 1.15
                   ).toFixed(2)}`}
                 />
               </TabsContent>
@@ -714,7 +642,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                             variant="outline"
                             className="bg-green-500/10 text-green-500"
                           >
-                            {stock.carbonFootprint}
+                            {initialStock.carbonFootprint}
                           </Badge>
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -886,7 +814,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                         </div>
                         <div className="text-center">
                           <div className="text-3xl font-bold">
-                            ${(stock.price * 1.15).toFixed(2)}
+                            ${(initialStock.price * 1.15).toFixed(2)}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             Price Target
@@ -976,7 +904,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            Price Target: ${(stock.price * 1.2).toFixed(2)}
+                            Price Target: ${(initialStock.price * 1.2).toFixed(2)}
                           </div>
                           <div className="text-sm mt-2">
                             "Strong growth potential in emerging markets and
@@ -998,7 +926,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            Price Target: ${(stock.price * 1.18).toFixed(2)}
+                            Price Target: ${(initialStock.price * 1.18).toFixed(2)}
                           </div>
                           <div className="text-sm mt-2">
                             "Expect margin expansion and revenue growth
@@ -1020,7 +948,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            Price Target: ${(stock.price * 1.05).toFixed(2)}
+                            Price Target: ${(initialStock.price * 1.05).toFixed(2)}
                           </div>
                           <div className="text-sm mt-2">
                             "Valuation appears full at current levels despite
