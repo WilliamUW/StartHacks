@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import {
   Mic,
@@ -50,6 +48,14 @@ type MessageType =
   | "financial-advice"
   | "command-result"
 
+interface ThinkingStep {
+  id: string
+  content: string
+  status: "loading" | "complete" | "error"
+  result?: string
+  data?: any
+}
+
 interface Message {
   id: string
   content: string
@@ -60,20 +66,24 @@ interface Message {
   thinking?: ThinkingStep[]
 }
 
-interface ThinkingStep {
-  id: string
-  content: string
-  status: "loading" | "complete" | "error"
-  result?: string
-  data?: any
-}
-
 // Update the interface to include category
 interface SuggestedCommand {
   command: string
   description: string
   icon: React.ReactNode
   category: string
+}
+
+// Add this new component before the Home component
+const MessageTimestamp = ({ timestamp }: { timestamp: Date }) => {
+  const [formattedTime, setFormattedTime] = React.useState<string>('')
+
+  React.useEffect(() => {
+    // Format the time only on the client side
+    setFormattedTime(timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))
+  }, [timestamp])
+
+  return <span>{formattedTime}</span>
 }
 
 export default function Home() {
@@ -344,7 +354,6 @@ export default function Home() {
   const processUserMessage = (message: string) => {
     const lowerMessage = message.toLowerCase()
 
-    // Check for commands
     if (lowerMessage.startsWith("/client") || lowerMessage.includes("john smith")) {
       handleClientInfoRequest()
     } else if (lowerMessage.startsWith("/stock") || lowerMessage.includes("aapl") || lowerMessage.includes("apple")) {
@@ -352,21 +361,18 @@ export default function Home() {
     } else if (lowerMessage.startsWith("/create excel") || lowerMessage.includes("excel")) {
       handleExcelRequest()
     } else if (lowerMessage.startsWith("/create powerpoint") || lowerMessage.includes("powerpoint")) {
-      // Extract client name if present
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/)
-      const clientName = clientMatch ? clientMatch[1].trim() : "John Smith" // Default to John Smith if no client specified
+      const clientName = clientMatch ? clientMatch[1].trim() : "John Smith"
       handlePowerPointRequest(clientName)
     } else if (lowerMessage.startsWith("/portfolio") || lowerMessage.includes("portfolio")) {
       handlePortfolioRequest()
     } else if (lowerMessage.includes("buy") || lowerMessage.includes("invest") || lowerMessage.includes("should i")) {
       handleFinancialAdviceRequest()
     } else {
-      // Generic response
       setTimeout(() => {
         const agentMessage: Message = {
           id: Date.now().toString(),
-          content:
-            "I understand you're asking about financial information. Could you be more specific? You can try commands like '/client John Smith', '/stock AAPL', or ask about portfolio performance.",
+          content: "I understand you're asking about financial information. Could you be more specific? You can try commands like '/client John Smith', '/stock AAPL', or ask about portfolio performance.",
           type: "text",
           sender: "agent",
           timestamp: new Date(),
@@ -389,33 +395,36 @@ export default function Home() {
         {
           id: "1",
           content: "Retrieving client profile for John Smith",
-          status: "loading",
+          status: "loading" as const,
         },
       ],
     }
 
+    // Add the thinking message to state immediately
     setMessages((prev) => [...prev, thinkingMessage])
 
     // Update thinking steps over time
     setTimeout(() => {
+      const updatedThinking: ThinkingStep[] = [
+        {
+          id: "1",
+          content: "Retrieved client profile for John Smith",
+          status: "complete" as const,
+        },
+        {
+          id: "2",
+          content: "Analyzing portfolio performance",
+          status: "loading" as const,
+        },
+      ]
+
       setMessages((prev) => {
         const updated = [...prev]
         const thinkingIndex = updated.findIndex((m) => m.id === thinkingMessage.id)
         if (thinkingIndex !== -1) {
           updated[thinkingIndex] = {
             ...updated[thinkingIndex],
-            thinking: [
-              {
-                id: "1",
-                content: "Retrieved client profile for John Smith",
-                status: "complete",
-              },
-              {
-                id: "2",
-                content: "Analyzing portfolio performance",
-                status: "loading",
-              },
-            ],
+            thinking: updatedThinking,
           }
         }
         return updated
@@ -423,30 +432,32 @@ export default function Home() {
 
       // Add more thinking steps
       setTimeout(() => {
+        const furtherUpdatedThinking: ThinkingStep[] = [
+          {
+            id: "1",
+            content: "Retrieved client profile for John Smith",
+            status: "complete" as const,
+          },
+          {
+            id: "2",
+            content: "Analyzed portfolio performance",
+            status: "complete" as const,
+            result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
+          },
+          {
+            id: "3",
+            content: "Checking recent transactions and goals",
+            status: "loading" as const,
+          },
+        ]
+
         setMessages((prev) => {
           const updated = [...prev]
           const thinkingIndex = updated.findIndex((m) => m.id === thinkingMessage.id)
           if (thinkingIndex !== -1) {
             updated[thinkingIndex] = {
               ...updated[thinkingIndex],
-              thinking: [
-                {
-                  id: "1",
-                  content: "Retrieved client profile for John Smith",
-                  status: "complete",
-                },
-                {
-                  id: "2",
-                  content: "Analyzed portfolio performance",
-                  status: "complete",
-                  result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
-                },
-                {
-                  id: "3",
-                  content: "Checking recent transactions and goals",
-                  status: "loading",
-                },
-              ],
+              thinking: furtherUpdatedThinking,
             }
           }
           return updated
@@ -454,31 +465,33 @@ export default function Home() {
 
         // Complete thinking and add client info
         setTimeout(() => {
+          const finalThinking: ThinkingStep[] = [
+            {
+              id: "1",
+              content: "Retrieved client profile for John Smith",
+              status: "complete" as const,
+            },
+            {
+              id: "2",
+              content: "Analyzed portfolio performance",
+              status: "complete" as const,
+              result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
+            },
+            {
+              id: "3",
+              content: "Checked recent transactions and goals",
+              status: "complete" as const,
+              result: "Recent activity: $50,000 cash position increase for house down payment",
+            },
+          ]
+
           setMessages((prev) => {
             const updated = [...prev]
             const thinkingIndex = updated.findIndex((m) => m.id === thinkingMessage.id)
             if (thinkingIndex !== -1) {
               updated[thinkingIndex] = {
                 ...updated[thinkingIndex],
-                thinking: [
-                  {
-                    id: "1",
-                    content: "Retrieved client profile for John Smith",
-                    status: "complete",
-                  },
-                  {
-                    id: "2",
-                    content: "Analyzed portfolio performance",
-                    status: "complete",
-                    result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
-                  },
-                  {
-                    id: "3",
-                    content: "Checked recent transactions and goals",
-                    status: "complete",
-                    result: "Recent activity: $50,000 cash position increase for house down payment",
-                  },
-                ],
+                thinking: finalThinking,
               }
             }
             return updated
@@ -1263,7 +1276,7 @@ export default function Home() {
             <p className="text-sm font-medium">{message.content}</p>
             <div className="space-y-1.5">
               {message.thinking?.map((step) => (
-                <div key={step.id} className="flex items-start">
+                <div key={step.id} className="flex items-start gap-2">
                   {step.status === "loading" ? (
                     <Loader2 className="h-4 w-4 text-muted-foreground animate-spin mr-2 mt-0.5" />
                   ) : step.status === "complete" ? (
@@ -1296,7 +1309,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold">{message.data.name}</h3>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    <Badge variant="outline" className="bg-primary/10 text-primary">
+                    <Badge variant="outline" className="bg-primary/10">
                       Portfolio: {message.data.portfolioValue}
                     </Badge>
                     <Badge variant="outline" className="bg-green-500/10 text-green-500 flex items-center">
@@ -1317,12 +1330,12 @@ export default function Home() {
                     <div key={index} className="space-y-1">
                       <div className="flex justify-between">
                         <span className="text-sm font-medium">{goal.title}</span>
-                        <span className="text-sm">
+                        <span className="text-sm text-[#3B82F6]">
                           {goal.amount} by {goal.deadline}
                         </span>
                       </div>
                       <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full" style={{ width: `${goal.progress}%` }}></div>
+                        <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: `${goal.progress}%` }}></div>
                       </div>
                       <div className="text-xs text-muted-foreground text-right">{goal.progress}% complete</div>
                     </div>
@@ -1330,22 +1343,90 @@ export default function Home() {
                 </div>
               </div>
 
+              <div className="border-t p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-bold">Portfolio Value</h3>
+                    <p className="text-3xl font-bold mt-1">{message.data.totalValue}</p>
+                  </div>
+                  <div className="text-right">
+                    <h3 className="text-xl font-bold">YTD Return</h3>
+                    <Badge variant="outline" className="bg-green-500/10 text-green-500 text-lg mt-1 px-2 py-1">
+                      {message.data.ytdReturn}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">{message.data.benchmarkComparison}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium mb-3">Asset Allocation</h4>
+                    <div className="mt-2 space-y-1 text-sm">
+                      {message.data.allocation.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between">
+                          <span>{item.category}</span>
+                          <span>
+                            {item.percentage}% ({item.value})
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-3">Performance Metrics</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 border rounded-lg text-center">
+                        <div className="text-xs text-muted-foreground">Volatility</div>
+                        <div className="text-lg font-bold">{message.data.metrics.volatility}</div>
+                      </div>
+                      <div className="p-3 border rounded-lg text-center">
+                        <div className="text-xs text-muted-foreground">Sharpe Ratio</div>
+                        <div className="text-lg font-bold">{message.data.metrics.sharpeRatio}</div>
+                      </div>
+                      <div className="p-3 border rounded-lg text-center">
+                        <div className="text-xs text-muted-foreground">Dividend Yield</div>
+                        <div className="text-lg font-bold">{message.data.metrics.dividendYield}</div>
+                      </div>
+                      <div className="p-3 border rounded-lg text-center">
+                        <div className="text-xs text-muted-foreground">Annual Income</div>
+                        <div className="text-lg font-bold">{message.data.metrics.annualIncome}</div>
+                      </div>
+                    </div>
+
+                    <h4 className="font-medium mt-4 mb-2">Top Holdings</h4>
+                    <div className="space-y-1 text-sm">
+                      {message.data.topHoldings.map((holding: any, index: number) => (
+                        <div key={index} className="flex justify-between">
+                          <span>
+                            {holding.symbol} ({holding.name})
+                          </span>
+                          <span>
+                            {holding.value} ({holding.weight})
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="border-t p-4 bg-muted/30">
                 <h4 className="font-medium mb-2">Recent Activity</h4>
                 <p className="text-sm">{message.data.recentActivity}</p>
               </div>
-            </Card>
 
-            <div className="flex gap-2">
-              <Button size="sm">
-                <FileSpreadsheet className="h-4 w-4 mr-1" />
-                Generate Report
-              </Button>
-              <Button variant="outline" size="sm">
-                <BarChart4 className="h-4 w-4 mr-1" />
-                Portfolio Analysis
-              </Button>
-            </div>
+              <div className="flex gap-2 mt-4">
+                <Button size="sm" className="bg-[#3B82F6] hover:bg-[#3B82F6]/90">
+                  <FileSpreadsheet className="h-4 w-4 mr-1" />
+                  Generate Report
+                </Button>
+                <Button variant="outline" size="sm">
+                  <BarChart4 className="h-4 w-4 mr-1" />
+                  Portfolio Analysis
+                </Button>
+              </div>
+            </Card>
           </div>
         )
 
@@ -1398,7 +1479,7 @@ export default function Home() {
                 <div>
                   <h4 className="font-medium mb-3">Analyst Consensus</h4>
                   <div className="text-center p-3 bg-muted/30 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{message.data.analystRating}</div>
+                    <div className="text-2xl font-bold">{message.data.analystRating}</div>
                     <div className="text-sm text-muted-foreground">Price Target: ${message.data.priceTarget}</div>
                   </div>
 
@@ -1406,7 +1487,7 @@ export default function Home() {
                     <div className="text-sm mb-1">Client Preference Match</div>
                     <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-green-500 rounded-full"
+                        className="h-full bg-[#3B82F6] rounded-full"
                         style={{ width: `${message.data.clientMatch}%` }}
                       ></div>
                     </div>
@@ -1431,15 +1512,15 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-            </Card>
 
-            <div className="flex gap-2">
-              <Button size="sm">Add to Watchlist</Button>
-              <Button variant="outline" size="sm">
-                <TrendingUp className="h-4 w-4 mr-1" />
-                Technical Analysis
-              </Button>
-            </div>
+              <div className="flex gap-2 mt-4">
+                <Button size="sm" className="bg-[#3B82F6] hover:bg-[#3B82F6]/90">Add to Watchlist</Button>
+                <Button variant="outline" size="sm">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Technical Analysis
+                </Button>
+              </div>
+            </Card>
           </div>
         )
 
@@ -1452,11 +1533,11 @@ export default function Home() {
               <div className="p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-bold">Portfolio Value</h3>
-                    <p className="text-3xl font-bold mt-1">{message.data.totalValue}</p>
+                    <h3 className="text-xl font-bold text-blue-500">Portfolio Value</h3>
+                    <p className="text-3xl font-bold text-blue-500 mt-1">{message.data.totalValue}</p>
                   </div>
                   <div className="text-right">
-                    <h3 className="text-xl font-bold">YTD Return</h3>
+                    <h3 className="text-xl font-bold text-blue-500">YTD Return</h3>
                     <Badge variant="outline" className="bg-green-500/10 text-green-500 text-lg mt-1 px-2 py-1">
                       {message.data.ytdReturn}
                     </Badge>
@@ -1472,14 +1553,11 @@ export default function Home() {
               <div className="border-t p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-medium mb-3">Asset Allocation</h4>
-                    <div className="h-[180px]">
-                      <PortfolioPieChart />
-                    </div>
+                    <h4 className="font-medium mb-3 text-blue-500">Asset Allocation</h4>
                     <div className="mt-2 space-y-1 text-sm">
                       {message.data.allocation.map((item: any, index: number) => (
                         <div key={index} className="flex justify-between">
-                          <span>{item.category}</span>
+                          <span className="text-blue-500">{item.category}</span>
                           <span>
                             {item.percentage}% ({item.value})
                           </span>
@@ -1489,31 +1567,31 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <h4 className="font-medium mb-3">Performance Metrics</h4>
+                    <h4 className="font-medium mb-3 text-blue-500">Performance Metrics</h4>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 border rounded-lg text-center">
                         <div className="text-xs text-muted-foreground">Volatility</div>
-                        <div className="text-lg font-bold">{message.data.metrics.volatility}</div>
+                        <div className="text-lg font-bold text-blue-500">{message.data.metrics.volatility}</div>
                       </div>
                       <div className="p-3 border rounded-lg text-center">
                         <div className="text-xs text-muted-foreground">Sharpe Ratio</div>
-                        <div className="text-lg font-bold">{message.data.metrics.sharpeRatio}</div>
+                        <div className="text-lg font-bold text-blue-500">{message.data.metrics.sharpeRatio}</div>
                       </div>
                       <div className="p-3 border rounded-lg text-center">
                         <div className="text-xs text-muted-foreground">Dividend Yield</div>
-                        <div className="text-lg font-bold">{message.data.metrics.dividendYield}</div>
+                        <div className="text-lg font-bold text-blue-500">{message.data.metrics.dividendYield}</div>
                       </div>
                       <div className="p-3 border rounded-lg text-center">
                         <div className="text-xs text-muted-foreground">Annual Income</div>
-                        <div className="text-lg font-bold">{message.data.metrics.annualIncome}</div>
+                        <div className="text-lg font-bold text-blue-500">{message.data.metrics.annualIncome}</div>
                       </div>
                     </div>
 
-                    <h4 className="font-medium mt-4 mb-2">Top Holdings</h4>
+                    <h4 className="font-medium mt-4 mb-2 text-blue-500">Top Holdings</h4>
                     <div className="space-y-1 text-sm">
                       {message.data.topHoldings.map((holding: any, index: number) => (
                         <div key={index} className="flex justify-between">
-                          <span>
+                          <span className="text-blue-500">
                             {holding.symbol} ({holding.name})
                           </span>
                           <span>
@@ -1525,18 +1603,18 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </Card>
 
-            <div className="flex gap-2">
-              <Button size="sm">
-                <FileSpreadsheet className="h-4 w-4 mr-1" />
-                Export Report
-              </Button>
-              <Button variant="outline" size="sm">
-                <PieChart className="h-4 w-4 mr-1" />
-                Rebalance Portfolio
-              </Button>
-            </div>
+              <div className="flex gap-2">
+                <Button size="sm">
+                  <FileSpreadsheet className="h-4 w-4 mr-1" />
+                  Export Report
+                </Button>
+                <Button variant="outline" size="sm">
+                  <PieChart className="h-4 w-4 mr-1" />
+                  Rebalance Portfolio
+                </Button>
+              </div>
+            </Card>
           </div>
         )
 
@@ -1561,15 +1639,14 @@ export default function Home() {
                       {message.data.sheets.map((sheet: string, index: number) => (
                         <div key={index} className="flex items-center p-2 hover:bg-muted/30 rounded-md text-sm">
                           <div
-                            className={`w-3 h-3 rounded-sm mr-2 ${
-                              index === 0
-                                ? "bg-green-500"
-                                : index === 1
-                                  ? "bg-blue-500"
-                                  : index === 2
-                                    ? "bg-purple-500"
-                                    : "bg-amber-500"
-                            }`}
+                            className={`w-3 h-3 rounded-sm mr-2 ${index === 0
+                              ? "bg-green-500"
+                              : index === 1
+                                ? "bg-blue-500"
+                                : index === 2
+                                  ? "bg-purple-500"
+                                  : "bg-amber-500"
+                              }`}
                           ></div>
                           {sheet}
                         </div>
@@ -1718,7 +1795,7 @@ export default function Home() {
 
               <div className="p-4 flex items-center justify-center border-b">
                 <div className="text-center">
-                  <div className="text-4xl font-bold mb-1">{message.data.recommendation}</div>
+                  <div className="text-4xl font-bold mb-1 text-blue-500">{message.data.recommendation}</div>
                   <div className="text-sm text-muted-foreground">Recommended Action</div>
                 </div>
               </div>
@@ -1791,21 +1868,13 @@ export default function Home() {
                 className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full animate-pulse"
                 style={{ animationDelay: "0.5s" }}
               ></div>
-              <div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[200%] h-[1px] bg-primary/20 animate-spin"
-                style={{ animationDuration: "20s" }}
-              ></div>
-              <div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[180%] h-[1px] bg-primary/15 animate-spin"
-                style={{ animationDuration: "25s", animationDirection: "reverse" }}
-              ></div>
             </div>
 
             <div className="relative mb-6 z-10">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
               <Button
                 size="lg"
-                className="h-14 px-6 rounded-full transition-all duration-150 shadow-lg bg-primary text-primary-foreground hover:bg-primary/90" // Changed from duration-300
+                className="h-14 px-6 rounded-full transition-all duration-150 shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={toggleVoiceMode}
               >
                 {voiceMode === "idle" ? (
@@ -1930,9 +1999,8 @@ export default function Home() {
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[90%] rounded-lg p-4 ${
-                    message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
-                  }`}
+                  className={`max-w-[90%] rounded-lg p-4 ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
+                    }`}
                 >
                   {message.sender === "agent" && (
                     <div className="flex items-center mb-2">
@@ -1944,11 +2012,10 @@ export default function Home() {
                   {renderMessageContent(message)}
 
                   <div
-                    className={`text-xs mt-2 ${
-                      message.sender === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
-                    }`}
+                    className={`text-xs mt-2 ${message.sender === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
+                      }`}
                   >
-                    {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    <MessageTimestamp timestamp={message.timestamp} />
                   </div>
                 </div>
               </div>

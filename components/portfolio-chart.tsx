@@ -1,243 +1,235 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import {
+  Area,
+  Line,
+  ComposedChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 export default function PortfolioChart() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [data, setData] = useState<any[]>([])
 
-  // Handle resize
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect()
-        setDimensions({ width, height })
-      }
-    }
+    // Generate market conditions that will affect both portfolio and benchmark
+    const marketConditions = generateMarketConditions()
 
-    // Initial size
-    handleResize()
+    // Generate data with correlation to market conditions
+    const portfolioData = generatePortfolioData(marketConditions)
+    const benchmarkData = generateBenchmarkData(marketConditions)
 
-    // Add resize listener
-    window.addEventListener("resize", handleResize)
+    // Combine data for the chart
+    const chartData = portfolioData.map((point, index) => ({
+      month: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][point.month],
+      portfolio: point.value,
+      benchmark: benchmarkData[index].value,
+    }))
 
-    // Cleanup
-    return () => window.removeEventListener("resize", handleResize)
+    setData(chartData)
   }, [])
 
-  // Draw chart whenever dimensions change
-  useEffect(() => {
-    if (!canvasRef.current || dimensions.width === 0) return
+  // Generate market conditions that will influence both portfolio and benchmark
+  const generateMarketConditions = () => {
+    const conditions = []
 
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Set canvas dimensions with device pixel ratio for sharp rendering
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = dimensions.width * dpr
-    canvas.height = dimensions.height * dpr
-    ctx.scale(dpr, dpr)
-
-    // Clear canvas
-    ctx.clearRect(0, 0, dimensions.width, dimensions.height)
-
-    // Chart dimensions
-    const width = dimensions.width
-    const height = dimensions.height
-    const padding = {
-      top: 20,
-      right: Math.max(40, width * 0.05),
-      bottom: 40,
-      left: Math.max(60, width * 0.08),
-    }
-
-    // Generate sample data
-    const portfolioData = generatePortfolioData()
-    const benchmarkData = generateBenchmarkData()
-
-    // Find min and max values
-    const allValues = [...portfolioData.map((d) => d.value), ...benchmarkData.map((d) => d.value)]
-    const minValue = Math.min(...allValues) * 0.95
-    const maxValue = Math.max(...allValues) * 1.05
-
-    // Draw axes
-    ctx.strokeStyle = "#e2e8f0"
-    ctx.lineWidth = 1
-
-    // X-axis
-    ctx.beginPath()
-    ctx.moveTo(padding.left, height - padding.bottom)
-    ctx.lineTo(width - padding.right, height - padding.bottom)
-    ctx.stroke()
-
-    // Y-axis
-    ctx.beginPath()
-    ctx.moveTo(padding.left, padding.top)
-    ctx.lineTo(padding.left, height - padding.bottom)
-    ctx.stroke()
-
-    // Draw grid lines
-    const gridCount = 5
-    ctx.strokeStyle = "#e2e8f0"
-    ctx.lineWidth = 0.5
-
-    for (let i = 1; i <= gridCount; i++) {
-      const y = padding.top + (height - padding.top - padding.bottom) * (i / gridCount)
-
-      ctx.beginPath()
-      ctx.moveTo(padding.left, y)
-      ctx.lineTo(width - padding.right, y)
-      ctx.stroke()
-
-      // Y-axis labels
-      const value = maxValue - (maxValue - minValue) * (i / gridCount)
-      ctx.fillStyle = "#64748b"
-      ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
-      ctx.textAlign = "right"
-      ctx.fillText(`$${Math.round(value).toLocaleString()}`, padding.left - 5, y + 3)
-    }
-
-    // X-axis labels (months)
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const xStep = (width - padding.left - padding.right) / (months.length - 1)
-
-    ctx.fillStyle = "#64748b"
-    ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
-    ctx.textAlign = "center"
-
-    // Determine how many labels to show based on width
-    const skipFactor = width < 500 ? 2 : 1
-
-    months.forEach((month, i) => {
-      if (i % skipFactor === 0 || i === months.length - 1) {
-        const x = padding.left + i * xStep
-        ctx.fillText(month, x, height - padding.bottom + 15)
-      }
-    })
-
-    // Draw portfolio line
-    ctx.strokeStyle = "#3b82f6"
-    ctx.lineWidth = 2
-    ctx.beginPath()
-
-    portfolioData.forEach((point, i) => {
-      const x = padding.left + (width - padding.left - padding.right) * (i / (portfolioData.length - 1))
-      const y =
-        height -
-        padding.bottom -
-        (height - padding.top - padding.bottom) * ((point.value - minValue) / (maxValue - minValue))
-
-      if (i === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
-      }
-    })
-
-    ctx.stroke()
-
-    // Draw portfolio area
-    const lastPoint = portfolioData[portfolioData.length - 1]
-    const lastX = padding.left + (width - padding.left - padding.right)
-    const lastY =
-      height -
-      padding.bottom -
-      (height - padding.top - padding.bottom) * ((lastPoint.value - minValue) / (maxValue - minValue))
-
-    ctx.lineTo(lastX, height - padding.bottom)
-    ctx.lineTo(padding.left, height - padding.bottom)
-    ctx.closePath()
-
-    ctx.fillStyle = "rgba(59, 130, 246, 0.1)"
-    ctx.fill()
-
-    // Draw benchmark line
-    ctx.strokeStyle = "#94a3b8"
-    ctx.lineWidth = 2
-    ctx.beginPath()
-
-    benchmarkData.forEach((point, i) => {
-      const x = padding.left + (width - padding.left - padding.right) * (i / (benchmarkData.length - 1))
-      const y =
-        height -
-        padding.bottom -
-        (height - padding.top - padding.bottom) * ((point.value - minValue) / (maxValue - minValue))
-
-      if (i === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
-      }
-    })
-
-    ctx.stroke()
-
-    // Draw legend
-    const legendX = width - padding.right - Math.min(150, width * 0.3)
-    const legendY = padding.top + 20
-
-    // Portfolio legend
-    ctx.fillStyle = "#3b82f6"
-    ctx.fillRect(legendX, legendY, 15, 2)
-    ctx.fillStyle = "#ffffff"
-    ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
-    ctx.textAlign = "left"
-    ctx.fillText("Portfolio", legendX + 20, legendY + 4)
-
-    // Benchmark legend
-    ctx.fillStyle = "#94a3b8"
-    ctx.fillRect(legendX, legendY + 20, 15, 2)
-    ctx.fillStyle = "#ffffff"
-    ctx.fillText("S&P 500", legendX + 20, legendY + 24)
-  }, [dimensions])
-
-  // Generate sample portfolio data
-  const generatePortfolioData = () => {
-    const baseValue = 2000000
-    const data = []
+    // Start with neutral market
+    let marketSentiment = 0
 
     for (let i = 0; i < 12; i++) {
-      let value = baseValue
+      // Market sentiment has some momentum (previous month influences next month)
+      marketSentiment = marketSentiment * 0.6 + (Math.random() - 0.5) * 0.4
 
-      // Add some randomness and an upward trend
-      if (i > 0) {
-        const prevValue = data[i - 1].value
-        const change = prevValue * (0.01 + Math.random() * 0.03) * (Math.random() > 0.3 ? 1 : -1)
-        value = prevValue + change + prevValue * 0.01 // Slight upward bias
+      // Add seasonal effects
+      const seasonalEffect = Math.sin(((i + 3) / 12) * Math.PI * 2) * 0.1 // Slight seasonal bias
+
+      // Add some key events
+      const events: Record<number, number> = {
+        // Positive earnings season in Q2
+        5: 0.2,
+        // Market dip in September (common pattern)
+        8: -0.15,
+        // Year-end rally
+        11: 0.1
       }
 
-      data.push({ month: i, value })
+      const eventEffect = events[i] || 0
+
+      conditions.push({
+        sentiment: marketSentiment + seasonalEffect + eventEffect,
+        volatility: 0.8 + Math.random() * 0.4 // Random volatility between 0.8 and 1.2
+      })
+    }
+
+    return conditions
+  }
+
+  // Generate sample portfolio data with correlation to market conditions
+  const generatePortfolioData = (marketConditions: any[]) => {
+    const baseValue = 2000000
+    const data = []
+    let value = baseValue
+    let cumulativeReturn = 0
+
+    for (let i = 0; i < 12; i++) {
+      if (i > 0) {
+        const condition = marketConditions[i]
+
+        // Portfolio has lower correlation with market and higher potential returns
+        const marketEffect = condition.sentiment * (1.5 + Math.random() * 0.5)
+        const specificEffect = (Math.random() - 0.3) * condition.volatility * 1.2 // Higher specific risk, positive bias
+
+        // Monthly return calculation with higher volatility
+        const monthlyReturn = (marketEffect + specificEffect) * 2.5
+        cumulativeReturn += monthlyReturn
+        value = baseValue * (1 + cumulativeReturn / 100)
+
+        // Less aggressive mean reversion for more trending behavior
+        if (value > baseValue * 1.4) {
+          value *= 0.997
+        } else if (value < baseValue * 0.8) {
+          value *= 1.003
+        }
+      }
+
+      data.push({ month: i, value: Math.round(value) })
     }
 
     return data
   }
 
-  // Generate sample benchmark data
-  const generateBenchmarkData = () => {
+  // Generate sample benchmark data (S&P 500) with realistic movements
+  const generateBenchmarkData = (marketConditions: any[]) => {
     const baseValue = 2000000
     const data = []
+    let value = baseValue
+    let cumulativeReturn = 0
 
     for (let i = 0; i < 12; i++) {
-      let value = baseValue
-
-      // Add some randomness and a slight upward trend
       if (i > 0) {
-        const prevValue = data[i - 1].value
-        const change = prevValue * (0.005 + Math.random() * 0.025) * (Math.random() > 0.4 ? 1 : -1)
-        value = prevValue + change + prevValue * 0.005 // Slight upward bias
+        const condition = marketConditions[i]
+
+        // S&P 500 follows market conditions more closely with lower volatility
+        const marketEffect = condition.sentiment * 1.2
+        const specificEffect = (Math.random() - 0.5) * condition.volatility * 0.5
+
+        // Monthly return calculation with lower volatility
+        const monthlyReturn = (marketEffect + specificEffect) * 1.8
+        cumulativeReturn += monthlyReturn
+        value = baseValue * (1 + cumulativeReturn / 100)
+
+        // Stronger mean reversion for more stable behavior
+        if (value > baseValue * 1.25) {
+          value *= 0.998
+        } else if (value < baseValue * 0.85) {
+          value *= 1.002
+        }
       }
 
-      data.push({ month: i, value })
+      data.push({ month: i, value: Math.round(value) })
     }
 
     return data
+  }
+
+  const formatYAxis = (value: number) => {
+    return `$${(value / 1000).toFixed(0)}k`
+  }
+
+  const formatTooltipValue = (value: number) => {
+    return `$${value.toLocaleString()}`
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[300px]">
-      <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} className="max-w-full" />
+    <div className="w-full h-[250px]">
+      <ResponsiveContainer width="100%" height="100%" debounce={1}>
+        <ComposedChart data={data} margin={{ top: 50, right: 20, left: 15, bottom: 20 }}>
+          <defs>
+            <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#60A5FA" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.01} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="rgba(255, 255, 255, 0.05)"
+          />
+          <XAxis
+            dataKey="month"
+            axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+            tick={{ fill: 'rgba(255, 255, 255, 0.5)', fontSize: 12 }}
+            tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+            padding={{ left: 0, right: 0 }}
+            dy={10}
+          />
+          <YAxis
+            tickFormatter={formatYAxis}
+            axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+            tick={{ fill: 'rgba(255, 255, 255, 0.5)', fontSize: 12 }}
+            tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+            width={55}
+            dx={-5}
+            domain={[(dataMin: number) => Math.floor(dataMin * 0.995), (dataMax: number) => Math.ceil(dataMax * 1.005)]}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'rgba(17, 25, 40, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}
+            formatter={(value: number, name: string) => [
+              formatTooltipValue(value),
+              name === 'portfolio' ? 'Portfolio' : 'S&P 500'
+            ]}
+            labelStyle={{ color: 'rgba(255, 255, 255, 0.7)', marginBottom: '4px', fontWeight: 500 }}
+            itemStyle={{ color: 'rgba(255, 255, 255, 0.9)', padding: '2px 0' }}
+          />
+          <Area
+            type="monotone"
+            dataKey="portfolio"
+            stroke="#60A5FA"
+            strokeWidth={2}
+            fill="url(#portfolioGradient)"
+            name="Portfolio"
+            isAnimationActive={true}
+            animationDuration={1000}
+            dot={false}
+            activeDot={{ r: 4, fill: '#60A5FA', stroke: '#fff', strokeWidth: 2 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="benchmark"
+            stroke="rgba(255, 255, 255, 0.6)"
+            strokeWidth={1.5}
+            dot={false}
+            name="S&P 500"
+            isAnimationActive={true}
+            animationDuration={1000}
+            activeDot={{ r: 4, fill: '#fff', stroke: '#fff', strokeWidth: 2 }}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+      <div className="absolute top-2 left-4">
+        <h3 className="text-[14px] font-medium text-white/90">Portfolio Value vs S&P 500</h3>
+        <p className="text-[12px] text-white/50 mt-1">YTD Performance</p>
+      </div>
+      <div className="absolute top-3 right-4 flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-[2px] bg-[#60A5FA]"></div>
+          <span className="text-[12px] text-white/90">Portfolio</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-[2px] bg-white/60"></div>
+          <span className="text-[12px] text-white/90">S&P 500</span>
+        </div>
+      </div>
     </div>
   )
 }
