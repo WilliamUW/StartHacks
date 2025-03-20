@@ -116,6 +116,7 @@ export default function StockSummary({
         console.log("stock summary", stockSummary);
         const parsedMetrics = await fetchCompanyMetrics(symbol);
         console.log("parsed metrics", parsedMetrics);
+        
         if (stockSummary) {
           setStock((prevStock) => ({
             ...prevStock,
@@ -127,7 +128,7 @@ export default function StockSummary({
             price: stockSummary.close,
             marketCap:
               (
-                (parseFloat(stockSummary["Outstanding Securities"]) *
+                (parseInt(stockSummary["Outstanding Securities"]) *
                   stockSummary.close) /
                 1e12
               ).toFixed(2) + "T",
@@ -193,7 +194,7 @@ export default function StockSummary({
             <div>
               <div className="text-xs text-muted-foreground">Market Cap (2025)</div>
               <div className="text-sm font-medium">
-                ${stock.metrics?.marketCap || "N/A"}
+                ${stock.marketCap || "N/A"}
               </div>
             </div>
           </div>
