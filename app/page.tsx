@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import NotificationCenter from "@/components/notification-center"
 
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
@@ -1885,9 +1886,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsExpanded(!isExpanded)}>
-              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
+            <NotificationCenter />
           </div>
         </div>
         {/* Messages area */}
