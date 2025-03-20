@@ -520,7 +520,7 @@ export default function Home() {
       thinking: [
         {
           id: uuidv4(),
-          content: "Retrieving client profile for John Smith",
+          content: "Retrieving client profile for Jane Smith",
           status: "loading",
         },
       ],
@@ -539,7 +539,7 @@ export default function Home() {
           thinking: [
             {
               id: uuidv4(),
-              content: "Retrieved client profile for John Smith",
+              content: "Retrieved client profile for Jane Smith",
               status: "complete",
             },
             {
@@ -850,8 +850,8 @@ export default function Home() {
                 peRatio: 31.2,
                 dividend: 0.92,
                 eps: 6.02,
-                analystRating: "Buy",
-                priceTarget: 215.45,
+                analystRating: "Hold",
+                priceTarget: 202.45,
                 socialCauses: [
                   "Environmental Sustainability",
                   "Privacy & Data Security",

@@ -787,7 +787,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                       <div className="flex items-center justify-between mb-6">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-green-500">
-                            Buy
+                            Sell
                           </div>
                           <div className="text-sm text-muted-foreground">
                             Consensus
