@@ -25,12 +25,13 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import NotificationCenter from "@/components/notification-center"
 import PortfolioChart from "@/components/portfolio-chart";
 import PortfolioPieChart from "@/components/portfolio-pie-chart";
 import type React from "react";
@@ -38,7 +39,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import StockChart from "@/components/stock-chart";
 import StockSummary from "@/components/stock-summary";
 import { cn } from "@/lib/utils";
-import {initialStockPlaceholder} from "./stocks/[symbol]/page";
+import { initialStockPlaceholder } from "./stocks/[symbol]/page";
 import { motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
 
@@ -77,6 +78,12 @@ interface SuggestedCommand {
   description: string;
   icon: React.ReactNode;
   category: string;
+}
+
+// Add this type near other interfaces
+interface SpeechRecognitionWindow extends Window {
+  webkitSpeechRecognition?: typeof SpeechRecognition;
+  SpeechRecognition?: typeof SpeechRecognition;
 }
 
 export default function Home() {
@@ -300,29 +307,56 @@ export default function Home() {
     }
   }, [voiceMode]);
 
-  // Update the toggleVoiceMode function to automatically show voice commands
-  const toggleVoiceMode = () => {
+  // Update the toggleVoiceMode function
+  const toggleVoiceMode = useCallback(() => {
     if (voiceMode === "idle") {
-      setVoiceMode("listening");
-      // Simulate voice recognition after 3 seconds
-      setTimeout(() => {
-        setVoiceMode("processing");
-        // Simulate processing for 1.5 seconds
-        setTimeout(() => {
-          // Add a simulated voice message
-          handleUserMessage("Show me John Smith's portfolio performance");
-          setVoiceMode("speaking");
+      // Initialize speech recognition
+      const SpeechRecognition = (window as SpeechRecognitionWindow).SpeechRecognition || 
+                               (window as SpeechRecognitionWindow).webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser.");
+        return;
+      }
 
-          // Simulate AI speaking for 3 seconds
-          setTimeout(() => {
-            setVoiceMode("idle");
-          }, 1000);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setVoiceMode("listening");
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setVoiceMode("processing");
+        
+        // Process the voice input and reset voice mode
+        setTimeout(() => {
+          handleUserMessage(transcript);
+          setVoiceMode("idle");
         }, 500);
-      }, 1000);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setVoiceMode("idle");
+      };
+
+      recognition.onend = () => {
+        // Only set to idle if we're still in listening mode
+        // This prevents overriding the "processing" state
+        if (voiceMode === "listening") {
+          setVoiceMode("idle");
+        }
+      };
+
+      recognition.start();
     } else {
       setVoiceMode("idle");
     }
-  };
+  }, [voiceMode]);
 
   // Add this function to toggle voice commands visibility
   const toggleVoiceCommands = () => {
@@ -1725,15 +1759,14 @@ export default function Home() {
                             className="flex items-center p-2 hover:bg-muted/30 rounded-md text-sm"
                           >
                             <div
-                              className={`w-3 h-3 rounded-sm mr-2 ${
-                                index === 0
-                                  ? "bg-green-500"
-                                  : index === 1
+                              className={`w-3 h-3 rounded-sm mr-2 ${index === 0
+                                ? "bg-green-500"
+                                : index === 1
                                   ? "bg-blue-500"
                                   : index === 2
-                                  ? "bg-purple-500"
-                                  : "bg-amber-500"
-                              }`}
+                                    ? "bg-purple-500"
+                                    : "bg-amber-500"
+                                }`}
                             ></div>
                             {sheet}
                           </div>
@@ -1971,12 +2004,20 @@ export default function Home() {
     setIsInputCollapsed((prev) => !prev);
   };
 
+  // Add this helper function
+  const isSpeechRecognitionSupported = () => {
+    return !!(
+      (window as SpeechRecognitionWindow).SpeechRecognition ||
+      (window as SpeechRecognitionWindow).webkitSpeechRecognition
+    );
+  };
+
   return (
     <main className="flex flex-col h-screen bg-background text-foreground">
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Voice activation overlay - shown when voice mode is active */}
-        {voiceMode !== "idle" && (
+        {/* Voice activation overlay - shown only during listening and processing */}
+        {(voiceMode === "listening" || voiceMode === "processing") && (
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
             <div className="absolute inset-0 overflow-hidden">
               {/* Animated background elements */}
@@ -2002,39 +2043,39 @@ export default function Home() {
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
               <Button
                 size="lg"
-                className="h-14 px-6 rounded-full transition-all duration-150 shadow-lg bg-primary text-primary-foreground hover:bg-primary/90" // Changed from duration-300
-                onClick={toggleVoiceMode}
-              >
-                {voiceMode === "idle" ? (
-                  <Mic className="h-16 w-16" />
-                ) : voiceMode === "listening" ? (
-                  <Mic className="h-16 w-16" />
-                ) : voiceMode === "processing" ? (
-                  <Loader2 className="h-16 w-16 animate-spin" />
-                ) : (
-                  <Volume2 className="h-16 w-16" />
+                className={cn(
+                  "h-14 px-6 rounded-full transition-all duration-150 shadow-lg",
+                  isSpeechRecognitionSupported() 
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
+                onClick={isSpeechRecognitionSupported() ? toggleVoiceMode : () => alert("Speech recognition is not supported in this browser.")}
+              >
+                <div className="flex items-center">
+                  <Mic className="h-5 w-5" />
+                  <span className="ml-2 font-medium">
+                    {!isSpeechRecognitionSupported() 
+                      ? "Speech not supported"
+                      : voiceMode === "idle"
+                      ? "Speak to Terminal Six"
+                      : voiceMode === "listening"
+                      ? "Listening..."
+                      : voiceMode === "processing"
+                      ? "Processing..."
+                      : "Speaking..."}
+                  </span>
+                </div>
               </Button>
             </div>
 
             <div className="text-center mb-8 z-10">
               <h3 className="text-3xl font-medium mb-2 text-white">
-                {voiceMode === "idle"
-                  ? "Tap to speak"
-                  : voiceMode === "listening"
-                  ? "Listening..."
-                  : voiceMode === "processing"
-                  ? "Processing..."
-                  : "Speaking..."}
+                {voiceMode === "listening" ? "Listening..." : "Processing..."}
               </h3>
               <p className="text-xl text-white/70">
-                {voiceMode === "idle"
-                  ? "Ask Terminal Six about your finances"
-                  : voiceMode === "listening"
+                {voiceMode === "listening"
                   ? "Say something like 'Show me John's portfolio'"
-                  : voiceMode === "processing"
-                  ? "Analyzing your request"
-                  : "Terminal Six is responding"}
+                  : "Analyzing your request"}
               </p>
             </div>
 
@@ -2113,6 +2154,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationCenter />
             <Button
               variant="ghost"
               size="icon"
@@ -2140,16 +2182,14 @@ export default function Home() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
-                  className={`max-w-[90%] rounded-lg p-4 ${
-                    message.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card border border-border"
-                  }`}
+                  className={`max-w-[90%] rounded-lg p-4 ${message.sender === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card border border-border"
+                    }`}
                 >
                   {message.sender === "agent" && (
                     <div className="flex items-center mb-2">
@@ -2161,11 +2201,10 @@ export default function Home() {
                   {renderMessageContent(message)}
 
                   <div
-                    className={`text-xs mt-2 ${
-                      message.sender === "user"
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground"
-                    }`}
+                    className={`text-xs mt-2 ${message.sender === "user"
+                      ? "text-primary-foreground/70"
+                      : "text-muted-foreground"
+                      }`}
                   >
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -2234,10 +2273,10 @@ export default function Home() {
                         {voiceMode === "idle"
                           ? "Speak to Terminal Six"
                           : voiceMode === "listening"
-                          ? "Listening..."
-                          : voiceMode === "processing"
-                          ? "Processing..."
-                          : "Speaking..."}
+                            ? "Listening..."
+                            : voiceMode === "processing"
+                              ? "Processing..."
+                              : "Speaking..."}
                       </span>
                     </div>
                   </Button>

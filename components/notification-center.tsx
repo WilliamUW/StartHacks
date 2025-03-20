@@ -165,6 +165,7 @@ const notifications: Notification[] = [
 export default function NotificationCenter() {
   const [activeNotifications, setActiveNotifications] = useState<Notification[]>(notifications)
   const [activeTab, setActiveTab] = useState<string>("all")
+  const [isOpen, setIsOpen] = useState(false)
 
   const unreadCount = activeNotifications.filter((n) => !n.isRead).length
 
@@ -184,15 +185,15 @@ export default function NotificationCenter() {
   const getTypeIcon = (type: NotificationType) => {
     switch (type) {
       case "urgent":
-        return <AlertTriangle className="h-5 w-5 text-red-500" />
+        return <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
       case "client":
-        return <Users className="h-5 w-5 text-blue-500" />
+        return <Users className="h-5 w-5 text-muted-foreground" />
       case "market":
-        return <TrendingDown className="h-5 w-5 text-amber-500" />
+        return <TrendingDown className="h-5 w-5 text-muted-foreground" />
       case "compliance":
-        return <ShieldAlert className="h-5 w-5 text-purple-500" />
+        return <ShieldAlert className="h-5 w-5 text-muted-foreground" />
       case "task":
-        return <Calendar className="h-5 w-5 text-green-500" />
+        return <Calendar className="h-5 w-5 text-muted-foreground" />
     }
   }
 
@@ -200,25 +201,25 @@ export default function NotificationCenter() {
     switch (priority) {
       case "critical":
         return (
-          <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-200 dark:border-red-800">
+          <Badge variant="outline" className="bg-red-500/10 text-red-400 dark:text-red-500 border-red-200/50 dark:border-red-800/50">
             Critical
           </Badge>
         )
       case "high":
         return (
-          <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-200 dark:border-amber-800">
+          <Badge variant="outline" className="bg-muted text-muted-foreground border-border/50">
             High
           </Badge>
         )
       case "medium":
         return (
-          <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-200 dark:border-blue-800">
+          <Badge variant="outline" className="bg-muted text-muted-foreground border-border/50">
             Medium
           </Badge>
         )
       case "low":
         return (
-          <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-200 dark:border-green-800">
+          <Badge variant="outline" className="bg-muted text-muted-foreground border-border/50">
             Low
           </Badge>
         )
@@ -226,138 +227,179 @@ export default function NotificationCenter() {
   }
 
   return (
-    <Card className="border shadow-sm">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Bell className="h-5 w-5 text-primary mr-2" />
-            <CardTitle>Action Center</CardTitle>
-            {unreadCount > 0 && <Badge className="ml-2 bg-primary">{unreadCount}</Badge>}
-          </div>
-          <Button variant="outline" size="sm">
-            Mark All Read
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <Tabs defaultValue="all" onValueChange={setActiveTab}>
-          <div className="px-4">
-            <TabsList className="grid grid-cols-6 mb-4">
-              <TabsTrigger value="all" className="text-xs">
-                All
-                {unreadCount > 0 && (
-                  <Badge variant="secondary" className="ml-1 text-[10px] px-1">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="urgent" className="text-xs">
-                Urgent
-                <Badge variant="secondary" className="ml-1 text-[10px] px-1">
-                  {activeNotifications.filter((n) => n.type === "urgent" && !n.isRead).length || 0}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="client" className="text-xs">
-                Clients
-              </TabsTrigger>
-              <TabsTrigger value="market" className="text-xs">
-                Market
-              </TabsTrigger>
-              <TabsTrigger value="compliance" className="text-xs">
-                Compliance
-              </TabsTrigger>
-              <TabsTrigger value="task" className="text-xs">
-                Tasks
-              </TabsTrigger>
-            </TabsList>
-          </div>
+    <div className="relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative hover:bg-muted/50"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Bell className="h-5 w-5 text-muted-foreground" />
+        {unreadCount > 0 && (
+          <Badge
+            className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px]"
+          >
+            {unreadCount}
+          </Badge>
+        )}
+      </Button>
 
-          <TabsContent value={activeTab} className="m-0">
-            <ScrollArea className="h-[400px]">
-              <div className="px-4 pb-4 space-y-3">
-                {filteredNotifications.length > 0 ? (
-                  filteredNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={cn(
-                        "p-3 border rounded-lg transition-colors",
-                        notification.isRead ? "bg-card" : "bg-muted/30",
-                        notification.priority === "critical" && "border-red-200 dark:border-red-800",
-                        notification.priority === "high" && "border-amber-200 dark:border-amber-800",
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 mt-1">{getTypeIcon(notification.type)}</div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">{notification.title}</h4>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 -mr-1 opacity-50 hover:opacity-100"
-                              onClick={() => dismissNotification(notification.id)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">{notification.description}</p>
-
-                          <div className="flex flex-wrap items-center gap-2 mt-2">
-                            {notification.clientName && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Users className="h-3 w-3 mr-1" />
-                                {notification.clientName}
-                              </Badge>
-                            )}
-
-                            {getPriorityBadge(notification.priority)}
-
-                            {notification.deadline && (
-                              <Badge variant="outline" className="text-xs">
-                                <Clock className="h-3 w-3 mr-1" />
-                                Due: {notification.deadline}
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="text-xs text-muted-foreground flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              {notification.time}
-                            </div>
-
-                            <div className="flex gap-2">
-                              {notification.actions?.secondary && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs">
-                                  {notification.actions.secondary}
-                                </Button>
-                              )}
-                              {notification.actions?.primary && (
-                                <Button size="sm" className="h-7 text-xs">
-                                  {notification.actions.primary}
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <CheckCircle2 className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                    <h3 className="font-medium text-lg">All caught up!</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      No {activeTab === "all" ? "" : activeTab} notifications to display.
-                    </p>
-                  </div>
-                )}
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          />
+          <Card className="absolute right-0 top-full mt-2 z-50 w-[480px] shadow-lg animate-in fade-in slide-in-from-top-2 border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <CardHeader className="pb-3 border-b border-border/50">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <Bell className="h-5 w-5 text-muted-foreground mr-2" />
+                  <CardTitle className="text-lg">Action Center</CardTitle>
+                  {unreadCount > 0 && <Badge className="ml-2 bg-red-500 text-white">{unreadCount}</Badge>}
+                </div>
+                <Button variant="outline" size="sm" className="hover:bg-muted/50">
+                  Mark All Read
+                </Button>
               </div>
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Tabs defaultValue="all" onValueChange={setActiveTab}>
+                <div className="px-4">
+                  <TabsList className="grid grid-cols-6 mb-4 bg-muted/50">
+                    <TabsTrigger value="all" className="text-xs data-[state=active]:bg-background">
+                      All
+                      {unreadCount > 0 && (
+                        <Badge variant="secondary" className="ml-1 text-[10px] px-1 bg-background/80">
+                          {unreadCount}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="urgent" className="text-xs data-[state=active]:bg-background">
+                      Urgent
+                      <Badge variant="secondary" className="ml-1 text-[10px] px-1 bg-background/80">
+                        {activeNotifications.filter((n) => n.type === "urgent" && !n.isRead).length || 0}
+                      </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="client" className="text-xs data-[state=active]:bg-background">
+                      Clients
+                    </TabsTrigger>
+                    <TabsTrigger value="market" className="text-xs data-[state=active]:bg-background">
+                      Market
+                    </TabsTrigger>
+                    <TabsTrigger value="compliance" className="text-xs data-[state=active]:bg-background">
+                      Compliance
+                    </TabsTrigger>
+                    <TabsTrigger value="task" className="text-xs data-[state=active]:bg-background">
+                      Tasks
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value={activeTab} className="m-0">
+                  <ScrollArea className="h-[400px]">
+                    <div className="px-4 pb-4 space-y-3">
+                      {filteredNotifications.length > 0 ? (
+                        filteredNotifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={cn(
+                              "p-3 rounded-lg transition-colors",
+                              notification.isRead
+                                ? "bg-card hover:bg-muted/30"
+                                : notification.type === "urgent"
+                                  ? "bg-red-500/5 hover:bg-red-500/10"
+                                  : "bg-muted/30 hover:bg-muted/50",
+                            )}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 mt-1">{getTypeIcon(notification.type)}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <h4 className={cn(
+                                    "font-medium",
+                                    notification.type === "urgent" ? "text-red-400 dark:text-red-500" : "text-foreground"
+                                  )}>
+                                    {notification.title}
+                                  </h4>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 -mr-1 opacity-50 hover:opacity-100 hover:bg-muted/50"
+                                    onClick={() => dismissNotification(notification.id)}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">{notification.description}</p>
+
+                                <div className="flex flex-wrap items-center gap-2 mt-2">
+                                  {notification.clientName && (
+                                    <Badge variant="secondary" className="text-xs bg-muted/50">
+                                      <Users className="h-3 w-3 mr-1 text-muted-foreground" />
+                                      {notification.clientName}
+                                    </Badge>
+                                  )}
+
+                                  {getPriorityBadge(notification.priority)}
+
+                                  {notification.deadline && (
+                                    <Badge variant="outline" className="text-xs bg-muted/50">
+                                      <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                                      Due: {notification.deadline}
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center justify-between mt-3">
+                                  <div className="text-xs text-muted-foreground flex items-center">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    {notification.time}
+                                  </div>
+
+                                  <div className="flex gap-2">
+                                    {notification.actions?.secondary && (
+                                      <Button variant="ghost" size="sm" className="h-7 text-xs hover:bg-muted/50">
+                                        {notification.actions.secondary}
+                                      </Button>
+                                    )}
+                                    {notification.actions?.primary && (
+                                      <Button
+                                        size="sm"
+                                        className={cn(
+                                          "h-7 text-xs",
+                                          notification.type === "urgent"
+                                            ? "bg-red-500 hover:bg-red-600 text-white"
+                                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        )}
+                                      >
+                                        {notification.actions.primary}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                          <CheckCircle2 className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                          <h3 className="font-medium text-lg text-foreground">All caught up!</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            No {activeTab === "all" ? "" : activeTab} notifications to display.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
   )
 }
 

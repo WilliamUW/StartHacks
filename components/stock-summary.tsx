@@ -16,6 +16,13 @@ interface StockSummaryData {
   "Outstanding Securities": string;
 }
 
+interface CompanyMetrics {
+  eps: string;
+  dividend: string;
+  marketCap: string;
+  earnings: string;
+}
+
 interface StockData {
   name: string;
   price: number;
@@ -35,6 +42,56 @@ interface StockData {
   regions: string[];
   esgRating: string;
   carbonFootprint: string;
+  metrics?: CompanyMetrics;
+}
+
+interface MetricsResponse {
+  "Fundamentals quarter 1 - Net Profit"?: string[];
+  "Fundamentals annual 2 - Net Profit"?: string[];
+  "Fundamentals quarter 2 - Net Profit"?: string[];
+  "Fundamentals quarter 12 - Net Profit"?: string[];
+}
+
+// Add this function before the StockSummary component
+async function fetchStockSummary(symbol: string): Promise<StockSummaryData | null> {
+  const summaryResponse = await fetch(`/api/summary?query=${symbol}`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  if (!summaryResponse.ok) {
+    throw new Error("Failed to fetch summary data");
+  }
+
+  const summaryData = await summaryResponse.json();
+  return summaryData.object
+    ? JSON.parse(JSON.parse(summaryData.object).data[0])[symbol] as StockSummaryData
+    : null;
+}
+
+async function fetchCompanyMetrics(symbol: string): Promise<MetricsResponse> {
+  const metricsQuery = {
+    [symbol]: "eps|2025",
+    [symbol]: "dividend|2025",
+    [symbol]: "market cap|2025",
+    [symbol]: "earnings|2025"
+  };
+
+  const metricsResponse = await fetch(`/api/companydatasearch?query=${encodeURIComponent(JSON.stringify(metricsQuery))}`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  if (!metricsResponse.ok) {
+    throw new Error("Failed to fetch company metrics");
+  }
+
+  const metricsData = await metricsResponse.json();
+  return JSON.parse(JSON.parse(metricsData.object).data[0]);
 }
 
 export default function StockSummary({
@@ -49,30 +106,17 @@ export default function StockSummary({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSummaryData = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const summaryResponse = await fetch(`/api/summary?query=${symbol}`, {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-          },
-        });
-
-        if (!summaryResponse.ok) {
-          throw new Error("Failed to fetch summary data");
-        }
-
-        const summaryData = await summaryResponse.json();
-        const stockSummary = summaryData.object
-          ? (JSON.parse(JSON.parse(summaryData.object).data[0])[
-              symbol
-            ] as StockSummaryData)
-          : null;
-        console.log(stockSummary);
-
+        console.log("fetching data");
+        const stockSummary = await fetchStockSummary(symbol);
+        console.log("stock summary", stockSummary);
+        const parsedMetrics = await fetchCompanyMetrics(symbol);
+        console.log("parsed metrics", parsedMetrics);
+        
         if (stockSummary) {
           setStock((prevStock) => ({
             ...prevStock,
@@ -80,25 +124,31 @@ export default function StockSummary({
             open: parseFloat(stockSummary.open),
             high: parseFloat(stockSummary.high),
             low: parseFloat(stockSummary.low),
-            volume: parseInt(stockSummary.vol),
+            volume: parseInt(stockSummary.vol) * 1000,
             price: stockSummary.close,
             marketCap:
               (
-                (parseFloat(stockSummary["Outstanding Securities"]) *
+                (parseInt(stockSummary["Outstanding Securities"]) *
                   stockSummary.close) /
                 1e12
               ).toFixed(2) + "T",
+            metrics: {
+              eps: parsedMetrics["Fundamentals quarter 1 - Net Profit"]?.[0] || "N/A",
+              dividend: parsedMetrics["Fundamentals annual 2 - Net Profit"]?.[0] || "N/A",
+              marketCap: parsedMetrics["Fundamentals quarter 2 - Net Profit"]?.[0] || "N/A",
+              earnings: parsedMetrics["Fundamentals quarter 12 - Net Profit"]?.[0] || "N/A"
+            }
           }));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
-        console.error("Error fetching summary data:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchSummaryData();
+    fetchData();
   }, [symbol]);
 
   const isPositive = stock.change >= 0;
@@ -112,6 +162,7 @@ export default function StockSummary({
       </Card>
     );
   }
+
   return (
     <>
       <Card>
@@ -129,18 +180,22 @@ export default function StockSummary({
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">EPS</div>
-              <div className="text-sm font-medium">${stock.eps.toFixed(2)}</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Dividend</div>
+              <div className="text-xs text-muted-foreground">EPS (2025)</div>
               <div className="text-sm font-medium">
-                ${stock.dividend.toFixed(2)}
+                ${stock.metrics?.eps || "N/A"}
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Market Cap</div>
-              <div className="text-sm font-medium">{stock.marketCap}</div>
+              <div className="text-xs text-muted-foreground">Dividend (2025)</div>
+              <div className="text-sm font-medium">
+                ${stock.metrics?.dividend || "N/A"}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Market Cap (2025)</div>
+              <div className="text-sm font-medium">
+                ${stock.marketCap || "N/A"}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -173,9 +228,25 @@ export default function StockSummary({
             <div>
               <div className="text-xs text-muted-foreground">Volume</div>
               <div className="text-sm font-medium">
-                {(stock.volume / 1000000).toFixed(1)}M
+                ${(stock.volume / 1000000).toFixed(1)}M
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Future Earnings (2025)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            ${stock.metrics?.earnings || "N/A"}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            Projected Net Profit
           </div>
         </CardContent>
       </Card>

@@ -216,26 +216,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
   const symbol = params.symbol.toUpperCase();
   
   // Get initial data from mock data or default values
-  const initialStock = stocksData[symbol as keyof typeof stocksData] || {
-    name: "Unknown Stock",
-    price: 0,
-    change: 0,
-    changePercent: 0,
-    open: 0,
-    high: 0,
-    low: 0,
-    volume: 0,
-    marketCap: "0",
-    peRatio: 0,
-    dividend: 0,
-    eps: 0,
-    sector: "Unknown",
-    industry: "Unknown",
-    socialCauses: [],
-    regions: [],
-    esgRating: "N/A",
-    carbonFootprint: "N/A",
-  };
+  const initialStock = stocksData[symbol as keyof typeof stocksData] || initialStockPlaceholder;
 
   return (
     <main className="flex h-screen bg-background text-foreground overflow-hidden">
