@@ -6,12 +6,18 @@ interface StockChartProps {
   symbol: string
   timeframe?: "1D" | "1W" | "1M" | "3M" | "1Y" | "5Y"
   height?: number
+  data?: {
+    dates: string[]
+    prices: number[]
+    volumes: number[]
+  }
 }
 
-export default function StockChart({ symbol, timeframe = "1M", height = 300 }: StockChartProps) {
+export default function StockChart({ symbol, timeframe = "1M", height = 300, data }: StockChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height })
+  const [error, setError] = useState<string | null>(null)
 
   // Handle resize
   useEffect(() => {
@@ -40,144 +46,157 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // Set canvas dimensions with device pixel ratio for sharp rendering
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = dimensions.width * dpr
-    canvas.height = dimensions.height * dpr
-    ctx.scale(dpr, dpr)
+    try {
+      // Set canvas dimensions with device pixel ratio for sharp rendering
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = dimensions.width * dpr
+      canvas.height = dimensions.height * dpr
+      ctx.scale(dpr, dpr)
 
-    // Chart dimensions
-    const width = dimensions.width
-    const chartHeight = dimensions.height
-    const padding = {
-      top: 20,
-      right: Math.max(40, width * 0.05),
-      bottom: 30,
-      left: Math.max(60, width * 0.08),
-    }
+      // Chart dimensions
+      const width = dimensions.width
+      const chartHeight = dimensions.height
+      const padding = {
+        top: 20,
+        right: Math.max(40, width * 0.05),
+        bottom: 30,
+        left: Math.max(60, width * 0.08),
+      }
 
-    // Generate sample data based on timeframe
-    const stockData = generateStockData(symbol, timeframe)
+      // Use real data if available, otherwise generate sample data
+      console.log(data)
+      const stockData = data && data.dates.length > 0 ? data.dates.map((date, i) => ({
+        date: new Date(date),
+        price: data.prices[i],
+        volume: data.volumes[i]
+      })) : generateStockData(symbol, timeframe)
 
-    // Find min and max values
-    const values = stockData.map((d) => d.price)
-    const minValue = Math.min(...values) * 0.98
-    const maxValue = Math.max(...values) * 1.02
+      console.log('Chart data:', stockData)
 
-    // Clear canvas
-    ctx.clearRect(0, 0, width, chartHeight)
+      // Find min and max values
+      const values = stockData.map((d) => d.price)
+      const minValue = Math.min(...values) * 0.98
+      const maxValue = Math.max(...values) * 1.02
 
-    // Draw grid lines
-    const gridCount = 5
-    ctx.strokeStyle = "#e2e8f0"
-    ctx.lineWidth = 0.5
+      // Clear canvas and error
+      ctx.clearRect(0, 0, width, chartHeight)
+      setError(null)
 
-    for (let i = 0; i <= gridCount; i++) {
-      const y = padding.top + ((chartHeight - padding.top - padding.bottom) * i) / gridCount
+      // Draw grid lines
+      const gridCount = 5
+      ctx.strokeStyle = "#e2e8f0"
+      ctx.lineWidth = 0.5
 
-      ctx.beginPath()
-      ctx.moveTo(padding.left, y)
-      ctx.lineTo(width - padding.right, y)
-      ctx.stroke()
+      for (let i = 0; i <= gridCount; i++) {
+        const y = padding.top + ((chartHeight - padding.top - padding.bottom) * i) / gridCount
 
-      // Y-axis labels
-      const value = maxValue - ((maxValue - minValue) * i) / gridCount
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(width - padding.right, y)
+        ctx.stroke()
+
+        // Y-axis labels
+        const value = maxValue - ((maxValue - minValue) * i) / gridCount
+        ctx.fillStyle = "#64748b"
+        ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
+        ctx.textAlign = "right"
+        ctx.fillText(`$${value.toFixed(2)}`, padding.left - 5, y + 3)
+      }
+
+      // X-axis labels
+      const xLabels = getXLabels(timeframe, stockData.length)
+
+      // Determine how many labels to show based on width
+      const skipFactor = width < 500 ? 2 : 1
+      const visibleLabels = xLabels.filter((_, i) => i % skipFactor === 0 || i === xLabels.length - 1)
+
+      const xStep = (width - padding.left - padding.right) / (visibleLabels.length - 1)
+
       ctx.fillStyle = "#64748b"
       ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
-      ctx.textAlign = "right"
-      ctx.fillText(`$${value.toFixed(2)}`, padding.left - 5, y + 3)
-    }
+      ctx.textAlign = "center"
 
-    // X-axis labels
-    const xLabels = getXLabels(timeframe, stockData.length)
+      visibleLabels.forEach((label, i) => {
+        const x = padding.left + i * xStep
+        ctx.fillText(label, x, chartHeight - padding.bottom + 15)
+      })
 
-    // Determine how many labels to show based on width
-    const skipFactor = width < 500 ? 2 : 1
-    const visibleLabels = xLabels.filter((_, i) => i % skipFactor === 0 || i === xLabels.length - 1)
+      // Draw price line
+      ctx.strokeStyle = "#3b82f6"
+      ctx.lineWidth = 2
+      ctx.beginPath()
 
-    const xStep = (width - padding.left - padding.right) / (visibleLabels.length - 1)
+      stockData.forEach((point, i) => {
+        const x = padding.left + ((width - padding.left - padding.right) * i) / (stockData.length - 1)
+        const y =
+          padding.top +
+          (chartHeight - padding.top - padding.bottom) * (1 - (point.price - minValue) / (maxValue - minValue))
 
-    ctx.fillStyle = "#64748b"
-    ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
-    ctx.textAlign = "center"
+        if (i === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      })
 
-    visibleLabels.forEach((label, i) => {
-      const x = padding.left + i * xStep
-      ctx.fillText(label, x, chartHeight - padding.bottom + 15)
-    })
+      ctx.stroke()
 
-    // Draw price line
-    ctx.strokeStyle = "#3b82f6"
-    ctx.lineWidth = 2
-    ctx.beginPath()
-
-    stockData.forEach((point, i) => {
-      const x = padding.left + ((width - padding.left - padding.right) * i) / (stockData.length - 1)
-      const y =
+      // Draw area under the line
+      const lastPoint = stockData[stockData.length - 1]
+      const lastX = width - padding.right
+      const lastY =
         padding.top +
-        (chartHeight - padding.top - padding.bottom) * (1 - (point.price - minValue) / (maxValue - minValue))
+        (chartHeight - padding.top - padding.bottom) * (1 - (lastPoint.price - minValue) / (maxValue - minValue))
 
-      if (i === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
-      }
-    })
+      ctx.lineTo(lastX, chartHeight - padding.bottom)
+      ctx.lineTo(padding.left, chartHeight - padding.bottom)
+      ctx.closePath()
 
-    ctx.stroke()
+      ctx.fillStyle = "rgba(59, 130, 246, 0.1)"
+      ctx.fill()
 
-    // Draw area under the line
-    const lastPoint = stockData[stockData.length - 1]
-    const lastX = width - padding.right
-    const lastY =
-      padding.top +
-      (chartHeight - padding.top - padding.bottom) * (1 - (lastPoint.price - minValue) / (maxValue - minValue))
+      // Draw volume bars
+      const volumeBarWidth = ((width - padding.left - padding.right) / stockData.length) * 0.8
+      const maxVolume = Math.max(...stockData.map((d) => d.volume))
+      const volumeScale = (chartHeight - padding.top - padding.bottom) * 0.2
 
-    ctx.lineTo(lastX, chartHeight - padding.bottom)
-    ctx.lineTo(padding.left, chartHeight - padding.bottom)
-    ctx.closePath()
+      ctx.fillStyle = "rgba(59, 130, 246, 0.3)"
 
-    ctx.fillStyle = "rgba(59, 130, 246, 0.1)"
-    ctx.fill()
+      stockData.forEach((point, i) => {
+        const x =
+          padding.left + ((width - padding.left - padding.right) * i) / (stockData.length - 1) - volumeBarWidth / 2
+        const volumeHeight = (point.volume / maxVolume) * volumeScale
+        const y = chartHeight - padding.bottom - volumeHeight
 
-    // Draw volume bars
-    const volumeBarWidth = ((width - padding.left - padding.right) / stockData.length) * 0.8
-    const maxVolume = Math.max(...stockData.map((d) => d.volume))
-    const volumeScale = (chartHeight - padding.top - padding.bottom) * 0.2
+        ctx.fillRect(x, y, volumeBarWidth, volumeHeight)
+      })
 
-    ctx.fillStyle = "rgba(59, 130, 246, 0.3)"
+      // Draw current price line and label
+      const currentPrice = stockData[stockData.length - 1].price
+      const currentPriceY =
+        padding.top +
+        (chartHeight - padding.top - padding.bottom) * (1 - (currentPrice - minValue) / (maxValue - minValue))
 
-    stockData.forEach((point, i) => {
-      const x =
-        padding.left + ((width - padding.left - padding.right) * i) / (stockData.length - 1) - volumeBarWidth / 2
-      const volumeHeight = (point.volume / maxVolume) * volumeScale
-      const y = chartHeight - padding.bottom - volumeHeight
+      ctx.strokeStyle = "#64748b"
+      ctx.setLineDash([5, 3])
+      ctx.beginPath()
+      ctx.moveTo(padding.left, currentPriceY)
+      ctx.lineTo(width - padding.right, currentPriceY)
+      ctx.stroke()
+      ctx.setLineDash([])
 
-      ctx.fillRect(x, y, volumeBarWidth, volumeHeight)
-    })
-
-    // Draw current price line and label
-    const currentPrice = stockData[stockData.length - 1].price
-    const currentPriceY =
-      padding.top +
-      (chartHeight - padding.top - padding.bottom) * (1 - (currentPrice - minValue) / (maxValue - minValue))
-
-    ctx.strokeStyle = "#64748b"
-    ctx.setLineDash([5, 3])
-    ctx.beginPath()
-    ctx.moveTo(padding.left, currentPriceY)
-    ctx.lineTo(width - padding.right, currentPriceY)
-    ctx.stroke()
-    ctx.setLineDash([])
-
-    // Price label
-    const labelWidth = 38
-    ctx.fillStyle = "#1e293b"
-    ctx.fillRect(width - padding.right + 1, currentPriceY - 10, labelWidth, 20)
-    ctx.fillStyle = "#ffffff"
-    ctx.textAlign = "center"
-    ctx.fillText(`$${currentPrice.toFixed(2)}`, width - padding.right + labelWidth / 2, currentPriceY + 4)
-  }, [dimensions, symbol, timeframe])
+      // Price label
+      const labelWidth = 38
+      ctx.fillStyle = "#1e293b"
+      ctx.fillRect(width - padding.right + 1, currentPriceY - 10, labelWidth, 20)
+      ctx.fillStyle = "#ffffff"
+      ctx.textAlign = "center"
+      ctx.fillText(`$${currentPrice.toFixed(2)}`, width - padding.right + labelWidth / 2, currentPriceY + 4)
+    } catch (err) {
+      console.error('Error drawing chart:', err)
+      setError('Error drawing chart. Please try again.')
+    }
+  }, [dimensions, symbol, timeframe, data])
 
   // Generate sample stock data
   const generateStockData = (symbol: string, timeframe: string) => {
@@ -375,6 +394,14 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     }
 
     return labels
+  }
+
+  if (error) {
+    return (
+      <div className="w-full flex items-center justify-center" style={{ height: `${height}px` }}>
+        <div className="text-red-500">{error}</div>
+      </div>
+    )
   }
 
   return (

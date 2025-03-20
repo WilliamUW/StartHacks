@@ -1,11 +1,40 @@
-import { ArrowLeft, Download, Share2, TrendingUp, TrendingDown, Clock, Globe, Leaf } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+"use client"
+
+import { ArrowLeft, Clock, Download, Globe, Leaf, Share2, TrendingDown, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
-import StockChart from "@/components/stock-chart"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import NewsCard from "@/components/news-card"
+import StockChart from "@/components/stock-chart"
+
+interface StockData {
+  name: string
+  price: number
+  change: number
+  changePercent: number
+  open: number
+  high: number
+  low: number
+  volume: number
+  marketCap: string
+  peRatio: number
+  dividend: number
+  eps: number
+  sector: string
+  industry: string
+  socialCauses: string[]
+  regions: string[]
+  esgRating: string
+  carbonFootprint: string
+  // Time series data
+  dates: string[]
+  prices: number[]
+  volumes: number[]
+}
 
 // Mock stock data
 const stocksData = {
@@ -28,6 +57,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific"],
     esgRating: "A-",
     carbonFootprint: "32% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
   MSFT: {
     name: "Microsoft Corporation",
@@ -48,6 +80,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific", "Latin America"],
     esgRating: "A",
     carbonFootprint: "45% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
   GOOGL: {
     name: "Alphabet Inc.",
@@ -68,6 +103,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific"],
     esgRating: "B+",
     carbonFootprint: "18% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
   AMZN: {
     name: "Amazon.com Inc.",
@@ -88,6 +126,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific", "Latin America"],
     esgRating: "B",
     carbonFootprint: "5% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
   TSLA: {
     name: "Tesla, Inc.",
@@ -108,6 +149,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific", "China"],
     esgRating: "A-",
     carbonFootprint: "65% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
   META: {
     name: "Meta Platforms, Inc.",
@@ -128,6 +172,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific", "Africa"],
     esgRating: "B",
     carbonFootprint: "10% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
   NVDA: {
     name: "NVIDIA Corporation",
@@ -148,6 +195,9 @@ const stocksData = {
     regions: ["North America", "Europe", "Asia Pacific", "Taiwan"],
     esgRating: "B+",
     carbonFootprint: "22% below industry average",
+    dates: [],
+    prices: [],
+    volumes: [],
   },
 }
 
@@ -158,9 +208,132 @@ const clientPreferences = {
   regions: ["North America", "Europe", "Emerging Markets - Asia"],
 }
 
+// Function to fetch real stock data
+async function fetchCompanyData(companyName: string): Promise<StockData | null> {
+  const today = new Date()
+  const threeMonthsAgo = new Date(today)
+  threeMonthsAgo.setMonth(today.getMonth() - 3)
+  const baseURL = "https://idchat-api-containerapp01-dev.orangepebble-16234c4b.switzerlandnorth.azurecontainerapps.io";
+
+  // Update URL to match the API structure
+  const url = `${baseURL}/api/stock-prices`
+
+  console.log('Fetching data from:', url)
+  console.log('Request body:', {
+    company: companyName,
+    startDate: threeMonthsAgo.toISOString(),
+    endDate: today.toISOString(),
+  })
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        company: companyName,
+        startDate: threeMonthsAgo.toISOString(),
+        endDate: today.toISOString(),
+      }),
+      cache: 'no-store', // Disable caching
+    })
+
+    if (!response.ok) {
+      console.error('API response not ok:', response.status, response.statusText)
+      const errorText = await response.text()
+      console.error('Error response:', errorText)
+      throw new Error('Network response was not ok')
+    }
+
+    const data = await response.json()
+    console.log('API Response:', data)
+    
+    // Transform API response into StockData format
+    if (data && data.stockData) {
+      console.log('Stock data found:', {
+        dates: data.stockData.dates?.length || 0,
+        prices: data.stockData.prices?.length || 0,
+        volumes: data.stockData.volumes?.length || 0
+      })
+
+      // Format the data to match the expected structure
+      const stockPrices = data.stockData.prices || []
+      const stockDates = data.stockData.dates || []
+      const stockVolumes = data.stockData.volumes || []
+
+      const latestPrice = stockPrices[stockPrices.length - 1]
+      const previousPrice = stockPrices[stockPrices.length - 2] || latestPrice
+      const priceChange = latestPrice - previousPrice
+      const priceChangePercent = (priceChange / previousPrice) * 100
+
+      const transformedData = {
+        name: data.stockData.companyName || companyName,
+        price: latestPrice,
+        change: priceChange,
+        changePercent: priceChangePercent,
+        open: data.stockData.open || latestPrice,
+        high: Math.max(...stockPrices),
+        low: Math.min(...stockPrices),
+        volume: stockVolumes[stockVolumes.length - 1] || 0,
+        marketCap: data.stockData.marketCap || "N/A",
+        peRatio: data.stockData.peRatio || 0,
+        dividend: data.stockData.dividend || 0,
+        eps: data.stockData.eps || 0,
+        sector: data.stockData.sector || "Unknown",
+        industry: data.stockData.industry || "Unknown",
+        socialCauses: data.stockData.socialCauses || [],
+        regions: data.stockData.regions || [],
+        esgRating: data.stockData.esgRating || "N/A",
+        carbonFootprint: data.stockData.carbonFootprint || "N/A",
+        dates: stockDates,
+        prices: stockPrices,
+        volumes: stockVolumes,
+      }
+
+      console.log('Transformed data:', transformedData)
+      return transformedData
+    }
+
+    console.log('No stock data found in response')
+    return null
+  } catch (error) {
+    console.error('Error fetching company data:', error)
+    return null
+  }
+}
+
 export default function StockPage({ params }: { params: { symbol: string } }) {
+  const [stockData, setStockData] = useState<StockData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const symbol = params.symbol.toUpperCase()
-  const stock = stocksData[symbol as keyof typeof stocksData] || {
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const data = await fetchCompanyData(symbol)
+        if (data) {
+          setStockData(data)
+        } else {
+          setError('Failed to fetch stock data')
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        setError('Failed to fetch stock data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [symbol])
+
+  // Use mock data as fallback if API fails
+  const stock = stockData || stocksData[symbol as keyof typeof stocksData] || {
     name: "Unknown Stock",
     price: 0,
     change: 0,
@@ -179,6 +352,9 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
     regions: [],
     esgRating: "N/A",
     carbonFootprint: "N/A",
+    dates: [],
+    prices: [],
+    volumes: [],
   }
 
   const isPositive = stock.change >= 0
@@ -248,10 +424,11 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                     >
                       {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
                       {isPositive ? "+" : ""}
-                      {stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
+                      ${Math.abs(stock.change).toFixed(2)} ({Math.abs(stock.changePercent).toFixed(2)}%)
                     </Badge>
                     <span className="text-sm text-muted-foreground flex items-center">
-                      <Clock className="h-3 w-3 mr-1" /> Today
+                      <Clock className="h-3 w-3 mr-1" />
+                      Last updated: {new Date().toLocaleTimeString()}
                     </span>
                   </div>
                 </div>
@@ -277,11 +454,57 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
                 </div>
               </div>
 
-              <Card className="border">
-                <CardContent className="p-0">
-                  <div className="h-[400px] p-4">
-                    <StockChart symbol={symbol} height={350} />
-                  </div>
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle>Price History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="3M">
+                    <TabsList className="mb-4">
+                      <TabsTrigger value="1D">1D</TabsTrigger>
+                      <TabsTrigger value="1W">1W</TabsTrigger>
+                      <TabsTrigger value="1M">1M</TabsTrigger>
+                      <TabsTrigger value="3M">3M</TabsTrigger>
+                      <TabsTrigger value="1Y">1Y</TabsTrigger>
+                      <TabsTrigger value="5Y">5Y</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="1D">
+                      <StockChart symbol={symbol} timeframe="1D" />
+                    </TabsContent>
+                    <TabsContent value="1W">
+                      <StockChart symbol={symbol} timeframe="1W" />
+                    </TabsContent>
+                    <TabsContent value="1M">
+                      <StockChart symbol={symbol} timeframe="1M" />
+                    </TabsContent>
+                    <TabsContent value="3M">
+                      {isLoading ? (
+                        <div className="flex items-center justify-center h-[300px]">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                      ) : error ? (
+                        <div className="flex items-center justify-center h-[300px] text-red-500">
+                          {error}
+                        </div>
+                      ) : (
+                        <StockChart 
+                          symbol={symbol} 
+                          timeframe="3M" 
+                          data={stockData ? {
+                            dates: stockData.dates,
+                            prices: stockData.prices,
+                            volumes: stockData.volumes
+                          } : undefined}
+                        />
+                      )}
+                    </TabsContent>
+                    <TabsContent value="1Y">
+                      <StockChart symbol={symbol} timeframe="1Y" />
+                    </TabsContent>
+                    <TabsContent value="5Y">
+                      <StockChart symbol={symbol} timeframe="5Y" />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </div>
