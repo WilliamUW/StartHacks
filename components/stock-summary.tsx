@@ -126,18 +126,17 @@ export default function StockSummary({
         console.log("fetching data");
         const stockSummary = await fetchStockSummary(symbol);
         console.log("stock summary", stockSummary);
-        const parsedMetrics = await fetchCompanyMetrics(
+        const earningsMetrics = await fetchCompanyMetrics(
           symbol,
-          "dividend",
+          "earnings",
           "2025"
         );
-        console.log("parsed metrics", parsedMetrics);
         const dividendMetric = await fetchCompanyMetrics(
           symbol,
           "dividend",
           "2025"
         );
-        console.log("parsed metrics", dividendMetric);
+        const epsMetric = await fetchCompanyMetrics(symbol, "eps", "2025");
 
         if (stockSummary) {
           setStock((prevStock) => ({
@@ -155,16 +154,10 @@ export default function StockSummary({
                 1e12
               ).toFixed(2) + "T",
             metrics: {
-              eps:
-                parsedMetrics["Fundamentals quarter 1 - Net Profit"]?.[0] ||
-                "N/A",
-              dividend: dividendMetric["Dividend Yield (SIX)"][0] || "N/A",
-              marketCap:
-                parsedMetrics["Fundamentals quarter 2 - Net Profit"]?.[0] ||
-                "N/A",
+              eps: epsMetric["Reported Earnings per Share"]?.[0] || 0,
+              dividend: dividendMetric["Dividend Yield (SIX)"]?.[0] || 0,
               earnings:
-                parsedMetrics["Fundamentals quarter 12 - Net Profit"]?.[0] ||
-                "N/A",
+                earningsMetrics["Fundamentals annual 2 - Net Profit"]?.[0] || 0,
             },
           }));
         }
@@ -202,29 +195,31 @@ export default function StockSummary({
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <div className="text-xs text-muted-foreground">P/E Ratio</div>
+              <div className="text-xs text-muted-foreground">
+                Annual Net Profit
+              </div>
               <div className="text-sm font-medium">
-                {stock.peRatio.toFixed(2)}
+                ${stock.metrics?.earnings}B
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">EPS (2025)</div>
+              <div className="text-xs text-muted-foreground">
+                Earnings Per Share
+              </div>
               <div className="text-sm font-medium">
                 ${stock.metrics?.eps || "N/A"}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">
-                Dividend (2025)
+                Dividend Yield
               </div>
               <div className="text-sm font-medium">
                 {stock.metrics?.dividend || "N/A"}%
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">
-                Market Cap (2025)
-              </div>
+              <div className="text-xs text-muted-foreground">Market Cap</div>
               <div className="text-sm font-medium">
                 ${stock.marketCap || "N/A"}
               </div>
