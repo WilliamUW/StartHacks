@@ -12,6 +12,57 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height })
+  const [stockData, setStockData] = useState<{ date: Date; price: number; volume: number }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch stock data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const response = await fetch('/api/stock', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            companyName: symbol,
+            timeframe,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch stock data');
+        }
+
+        const { data } = await response.json();
+
+        console.log('Fetched stock data:', data)
+        
+        // Transform the object data into our required array format
+        const transformedData = Object.entries(data).map(([dateStr, item]: [string, any]) => ({
+          date: new Date(dateStr),
+          price: parseFloat(item.close),
+          volume: parseInt(item.vol),
+        }));
+
+        // Sort by date to ensure correct order
+        transformedData.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+        setStockData(transformedData);
+      } catch (err) {
+        console.error('Error fetching stock data:', err);
+        setError('Failed to load stock data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [symbol, timeframe]);
 
   // Handle resize
   useEffect(() => {
@@ -32,9 +83,9 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     return () => window.removeEventListener("resize", handleResize)
   }, [height])
 
-  // Draw chart whenever dimensions change
+  // Draw chart whenever dimensions or data change
   useEffect(() => {
-    if (!canvasRef.current || dimensions.width === 0) return
+    if (!canvasRef.current || dimensions.width === 0 || stockData.length === 0) return
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")
@@ -55,9 +106,6 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
       bottom: 30,
       left: Math.max(60, width * 0.08),
     }
-
-    // Generate sample data based on timeframe
-    const stockData = generateStockData(symbol, timeframe)
 
     // Find min and max values
     const values = stockData.map((d) => d.price)
@@ -89,7 +137,24 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     }
 
     // X-axis labels
-    const xLabels = getXLabels(timeframe, stockData.length)
+    const xLabels = stockData.map(d => {
+      const date = new Date(d.date)
+      switch (timeframe) {
+        case "1D":
+          return date.getHours() + ":00"
+        case "1W":
+          return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()]
+        case "1M":
+        case "3M":
+          return date.getDate().toString()
+        case "1Y":
+          return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getMonth()]
+        case "5Y":
+          return `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getMonth()]} ${date.getFullYear()}`
+        default:
+          return date.toLocaleDateString()
+      }
+    })
 
     // Determine how many labels to show based on width
     const skipFactor = width < 500 ? 2 : 1
@@ -157,7 +222,7 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     })
 
     // Draw current price line and label
-    const currentPrice = stockData[stockData.length - 1].price
+    const currentPrice = lastPoint.price
     const currentPriceY =
       padding.top +
       (chartHeight - padding.top - padding.bottom) * (1 - (currentPrice - minValue) / (maxValue - minValue))
@@ -177,204 +242,22 @@ export default function StockChart({ symbol, timeframe = "1M", height = 300 }: S
     ctx.fillStyle = "#ffffff"
     ctx.textAlign = "center"
     ctx.fillText(`$${currentPrice.toFixed(2)}`, width - padding.right + labelWidth / 2, currentPriceY + 4)
-  }, [dimensions, symbol, timeframe])
+  }, [dimensions, stockData, timeframe])
 
-  // Generate sample stock data
-  const generateStockData = (symbol: string, timeframe: string) => {
-    // Use symbol to seed the random number generator for consistent results
-    const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    const rand = (min: number, max: number) => {
-      const x = Math.sin(seed + stockData.length) * 10000
-      const r = x - Math.floor(x)
-      return min + r * (max - min)
-    }
-
-    const stockData: { date: Date; price: number; volume: number }[] = []
-    const basePrice = 100 + (seed % 400) // Different base price for each stock
-    let price = basePrice
-    let dataPoints = 0
-
-    // Set number of data points based on timeframe
-    switch (timeframe) {
-      case "1D":
-        dataPoints = 24 // Hourly for a day
-        break
-      case "1W":
-        dataPoints = 7 // Daily for a week
-        break
-      case "1M":
-        dataPoints = 30 // Daily for a month
-        break
-      case "3M":
-        dataPoints = 90 // Daily for 3 months
-        break
-      case "1Y":
-        dataPoints = 52 // Weekly for a year
-        break
-      case "5Y":
-        dataPoints = 60 // Monthly for 5 years
-        break
-      default:
-        dataPoints = 30
-    }
-
-    const now = new Date()
-    const currentDate = new Date()
-
-    // Adjust start date based on timeframe
-    switch (timeframe) {
-      case "1D":
-        currentDate.setHours(now.getHours() - dataPoints)
-        break
-      case "1W":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "1M":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "3M":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "1Y":
-        currentDate.setDate(now.getDate() - dataPoints * 7) // Weekly
-        break
-      case "5Y":
-        currentDate.setMonth(now.getMonth() - dataPoints) // Monthly
-        break
-    }
-
-    for (let i = 0; i < dataPoints; i++) {
-      // Calculate price change with some randomness and trend
-      const change = price * rand(-0.02, 0.02) // -2% to +2% daily change
-      price += change
-
-      // Generate random volume
-      const volume = Math.floor(rand(100000, 1000000))
-
-      // Add data point
-      stockData.push({
-        date: new Date(currentDate),
-        price,
-        volume,
-      })
-
-      // Increment date based on timeframe
-      switch (timeframe) {
-        case "1D":
-          currentDate.setHours(currentDate.getHours() + 1)
-          break
-        case "1W":
-        case "1M":
-        case "3M":
-          currentDate.setDate(currentDate.getDate() + 1)
-          break
-        case "1Y":
-          currentDate.setDate(currentDate.getDate() + 7) // Weekly
-          break
-        case "5Y":
-          currentDate.setMonth(currentDate.getMonth() + 1) // Monthly
-          break
-      }
-    }
-
-    return stockData
+  if (loading) {
+    return (
+      <div ref={containerRef} className="w-full flex items-center justify-center" style={{ height: `${height}px` }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+      </div>
+    );
   }
 
-  // Get X-axis labels based on timeframe
-  const getXLabels = (timeframe: string, dataPoints: number) => {
-    const labels: string[] = []
-    const now = new Date()
-    const currentDate = new Date()
-
-    // Adjust start date based on timeframe
-    switch (timeframe) {
-      case "1D":
-        currentDate.setHours(now.getHours() - dataPoints)
-        break
-      case "1W":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "1M":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "3M":
-        currentDate.setDate(now.getDate() - dataPoints)
-        break
-      case "1Y":
-        currentDate.setDate(now.getDate() - dataPoints * 7) // Weekly
-        break
-      case "5Y":
-        currentDate.setMonth(now.getMonth() - dataPoints) // Monthly
-        break
-    }
-
-    // Create labels based on timeframe
-    const step = Math.max(1, Math.floor(dataPoints / 6)) // Show about 6 labels
-
-    for (let i = 0; i < dataPoints; i += step) {
-      let label = ""
-
-      switch (timeframe) {
-        case "1D":
-          label = currentDate.getHours() + ":00"
-          currentDate.setHours(currentDate.getHours() + step)
-          break
-        case "1W":
-          label = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][currentDate.getDay()]
-          currentDate.setDate(currentDate.getDate() + step)
-          break
-        case "1M":
-        case "3M":
-          label = currentDate.getDate().toString()
-          currentDate.setDate(currentDate.getDate() + step)
-          break
-        case "1Y":
-          label = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
-            currentDate.getMonth()
-          ]
-          currentDate.setDate(currentDate.getDate() + step * 7)
-          break
-        case "5Y":
-          label =
-            ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
-            currentDate.getMonth()
-            ] +
-            " " +
-            currentDate.getFullYear()
-          currentDate.setMonth(currentDate.getMonth() + step)
-          break
-      }
-
-      labels.push(label)
-    }
-
-    // Ensure we have the last label
-    switch (timeframe) {
-      case "1D":
-        labels.push(now.getHours() + ":00")
-        break
-      case "1W":
-        labels.push(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][now.getDay()])
-        break
-      case "1M":
-      case "3M":
-        labels.push(now.getDate().toString())
-        break
-      case "1Y":
-        labels.push(
-          ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][now.getMonth()],
-        )
-        break
-      case "5Y":
-        labels.push(
-          ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][now.getMonth()] +
-          " " +
-          now.getFullYear(),
-        )
-        break
-    }
-
-    return labels
+  if (error) {
+    return (
+      <div ref={containerRef} className="w-full flex items-center justify-center" style={{ height: `${height}px` }}>
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
   }
 
   return (
