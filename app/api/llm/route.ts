@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 
 const baseURL = "https://idchat-api-containerapp01-dev.orangepebble-16234c4b.switzerlandnorth.azurecontainerapps.io";
 const llmFunctionDefinition = `
-        {
+    {
         "name": "determine_function",
-        "description": "Given a natural language input, determine which of the two functions should be called: /client or /stock. Output should be formatted in JSON: {'endpoint': *selected endpoint*, 'args': *argument like name or ticker*}. If asked 'analyze APPLE' you'd give {'endpoint': '\stock', 'args': 'APPLE'}. If natural language cannot be sorted return {'endpoint': null, 'args': null}",
+        "description": "Given a natural language input, you will do 2 things. 1) If the natural langugage input can be classified into a request for a function call. If the interaction can be seen as a request to pull up a client's information or to return information about a stock then you wil set the function to /client or /stock accordingly. If the input can be classified as a request to do a banking transaction of some sort (think moving money around) then you will set the function to /transaction. 2) You will then return the args that each function will take. So for client -  the arg would be their name. For stock the ticker would be returned. For transaction, a string confirming that the transaction has been scheduled would be saved as the arg. The output would be returned in a formatted JSON: {'endpoint': *selected endpoint*, 'args': *argument like name or ticker or sale*}. If natural language cannot be sorted return {'endpoint': null, 'args': null}",
         "strict": true,
         "parameters": {
             "type": "object",
@@ -19,7 +19,7 @@ const llmFunctionDefinition = `
             },
             "additionalProperties": false
         }
-        }`;
+    }`;
 
 async function getFunctionFromNL(nlInput : string) {
     try {

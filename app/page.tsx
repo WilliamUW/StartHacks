@@ -478,10 +478,12 @@ export default function Home() {
       }
       const data = await response.json();
       if (data["endpoint"] != null) {
-        if (data["endpoint"] == "client") {
+        if (data["endpoint"].includes("client")) {
           handleClientInfoRequest();
-        } else {
+        } else if (data["endpoint"].includes("stock")){
           handleStockInfoRequest();
+        } else {
+          handleClientTransactionRequest(data["args"]);
         }
       } else {
         setTimeout(() => {
@@ -503,6 +505,79 @@ export default function Home() {
   // Helper to wait for a specified time (ms)
   const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
+
+  const handleClientTransactionRequest = async (transactionString : string) => {
+    // Create the initial thinking message
+    const thinkingMessage: Message = {
+      id: uuidv4(),
+      content: "Retrieving client information...",
+      type: "thinking",
+      sender: "agent",
+      timestamp: new Date(),
+      thinking: [
+        {
+          id: uuidv4(),
+          content: "Retrieving client profile for John Smith",
+          status: "loading",
+        },
+      ],
+    };
+
+    setMessages((prev) => [...prev, thinkingMessage]);
+
+    // Update thinking steps over time
+    await wait(500);
+    setMessages((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex((m) => m.id === thinkingMessage.id);
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          thinking: [
+            {
+              id: uuidv4(),
+              content: "Retrieved client profile for John Smith",
+              status: "complete",
+            },
+            {
+              id: uuidv4(),
+              content: "Pulling up transaction details",
+              status: "loading",
+            },
+          ],
+        };
+      }
+      return updated;
+    });
+
+    await wait(500);
+    setMessages((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex((m) => m.id === thinkingMessage.id);
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          thinking: [
+            {
+              id: uuidv4(),
+              content: "Retrieved transaction details",
+              status: "complete",
+            },
+            {
+              id: uuidv4(),
+              content: "Scheduled transaction",
+              status: "complete",
+              result:
+                transactionString,
+            },
+          ],
+        };
+      }
+      return updated;
+    });
+
+    setIsLoading(false);
+  };
 
   const handleClientInfoRequest = async () => {
     // Create the initial thinking message
