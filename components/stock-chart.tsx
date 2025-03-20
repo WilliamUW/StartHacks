@@ -165,14 +165,28 @@ export default function StockChart({
       }
     })
 
-    // Determine how many labels to show based on width
-    const skipFactor = width < 500 ? 2 : 1
-    const visibleLabels = xLabels.filter((_, i) => i % skipFactor === 0 || i === xLabels.length - 1)
+    // Set font for measurement
+    ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
+    
+    // Calculate average label width
+    const avgLabelWidth = xLabels.reduce((sum, label) => sum + ctx.measureText(label).width, 0) / xLabels.length
+    
+    // Calculate how many labels can fit without overlapping (including some padding)
+    const labelPadding = 20 // Minimum pixels between labels
+    const availableWidth = width - padding.left - padding.right
+    const maxLabels = Math.floor(availableWidth / (avgLabelWidth + labelPadding))
+    
+    // Calculate dynamic skip factor
+    const skipFactor = Math.max(1, Math.ceil(xLabels.length / maxLabels))
+    
+    // Filter labels based on dynamic skip factor
+    const visibleLabels = xLabels.filter((_, i) => 
+      i % skipFactor === 0 || i === xLabels.length - 1
+    )
 
     const xStep = (width - padding.left - padding.right) / (visibleLabels.length - 1)
 
     ctx.fillStyle = "#64748b"
-    ctx.font = `${Math.max(10, Math.min(12, width * 0.025))}px sans-serif`
     ctx.textAlign = "center"
 
     visibleLabels.forEach((label, i) => {
