@@ -399,14 +399,19 @@ export default function Home() {
 
     // Check for commands
     if (
-      lowerMessage.startsWith("/client") ||
-      lowerMessage.includes("john smith")
+ 
+      lowerMessage.includes("jane")
     ) {
       handleClientInfoRequest();
     } else if (
-      lowerMessage.startsWith("/stock") ||
+  
+      lowerMessage.includes("portfolio")
+    ) {
+      handlePortfolioRequest();
+    } else if (
+      lowerMessage.includes("analyze") || lowerMessage.includes("/stock") && (
       lowerMessage.includes("aapl") ||
-      lowerMessage.includes("apple")
+      lowerMessage.includes("apple"))
     ) {
       handleStockInfoRequest();
     } else if (
@@ -422,17 +427,15 @@ export default function Home() {
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/);
       const clientName = clientMatch ? clientMatch[1].trim() : "John Smith"; // Default to John Smith if no client specified
       handlePowerPointRequest(clientName);
-    } else if (
-      lowerMessage.startsWith("/portfolio") ||
-      lowerMessage.includes("portfolio")
-    ) {
-      handlePortfolioRequest();
-    } else if (
+    }  else if (
       lowerMessage.includes("buy") ||
       lowerMessage.includes("invest") ||
       lowerMessage.includes("should i")
     ) {
       handleFinancialAdviceRequest();
+    } else if (lowerMessage.includes("sell")) {
+      handleClientTransactionRequest("Shares of AAPL has been sold")
+
     } else {
       // Generic response
       const response = await fetch('/api/llm', {
