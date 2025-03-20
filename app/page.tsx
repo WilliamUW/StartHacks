@@ -394,7 +394,7 @@ export default function Home() {
   };
 
   // Update the processUserMessage function to handle the new PowerPoint command with client parameter
-  const processUserMessage = (message: string) => {
+  const processUserMessage = async (message: string) => {
     const lowerMessage = message.toLowerCase();
 
     // Check for commands
@@ -435,18 +435,40 @@ export default function Home() {
       handleFinancialAdviceRequest();
     } else {
       // Generic response
-      setTimeout(() => {
-        const agentMessage: Message = {
-          id: Date.now().toString(),
-          content:
-            "I understand you're asking about financial information. Could you be more specific? You can try commands like '/client John Smith', '/stock AAPL', or ask about portfolio performance.",
-          type: "text",
-          sender: "agent",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, agentMessage]);
-        setIsLoading(false);
-      }, 1000);
+      const response = await fetch('/api/llm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          naturalLanguage: lowerMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch stock data');
+      }
+      const data = await response.json();
+      if (data["endpoint"] != null) {
+        if (data["endpoint"] == "client") {
+          handleClientInfoRequest();
+        } else {
+          handleStockInfoRequest();
+        }
+      } else {
+        setTimeout(() => {
+          const agentMessage: Message = {
+            id: Date.now().toString(),
+            content:
+              "I understand you're asking about financial information. Could you be more specific? You can try commands like '/client John Smith', '/stock AAPL', or ask about portfolio performance.",
+            type: "text",
+            sender: "agent",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, agentMessage]);
+          setIsLoading(false);
+        }, 1000);
+      }
     }
   };
 
