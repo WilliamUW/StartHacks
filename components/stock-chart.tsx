@@ -2,19 +2,28 @@
 
 import { useEffect, useRef, useState } from "react"
 
+import {Badge} from "lucide-react"
+import { stocksData } from "@/app/stocks/[symbol]/page"
+
 interface StockChartProps {
   symbol: string
   timeframe?: "1D" | "1W" | "1M" | "3M" | "1Y" | "5Y"
   height?: number
 }
 
-export default function StockChart({ symbol, timeframe = "1Y", height = 300 }: StockChartProps) {
+export default function StockChart({ 
+  symbol, 
+  timeframe = "1Y", 
+  height = 300,
+}: StockChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height })
   const [stockData, setStockData] = useState<{ date: Date; price: number; volume: number }[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const stockInfo = stocksData[symbol as keyof typeof stocksData]
 
   // Fetch stock data
   useEffect(() => {
@@ -260,8 +269,57 @@ export default function StockChart({ symbol, timeframe = "1Y", height = 300 }: S
     );
   }
 
+  if (stockData.length === 0) {
+    return (
+      <div ref={containerRef} className="w-full flex items-center justify-center" style={{ height: `${height}px` }}>
+        <div className="text-muted-foreground">No data available</div>
+      </div>
+    );
+  }
+
+  const currentPrice = stockData[stockData.length - 1].price;
+  const previousPrice = stockData.length > 1 ? stockData[stockData.length - 2].price : currentPrice;
+  const priceChange = currentPrice - previousPrice;
+  const priceChangePercent = (priceChange / previousPrice) * 100;
+  const isPositive = priceChange >= 0;
+
   return (
     <div ref={containerRef} className="w-full" style={{ height: `${height}px` }}>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{symbol}</h1>
+          </div>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <span>{stockInfo?.name || symbol}</span>
+          </div>
+        </div>
+
+        <div className="text-right">
+          <div className="text-3xl font-bold">${currentPrice.toFixed(2)}</div>
+          <div className="flex items-center mt-1 justify-end">
+            <div className={`flex items-center ${isPositive ? "text-green-500" : "text-red-500"}`}>
+              {isPositive ? (
+                <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 13l5-5 5 5"/>
+                </svg>
+              ) : (
+                <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 11l5 5 5-5"/>
+                </svg>
+              )}
+              {isPositive ? "+" : ""}{priceChange.toFixed(2)} ({priceChangePercent.toFixed(2)}%)
+            </div>
+            <span className="text-sm text-muted-foreground ml-2 flex items-center">
+              <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              Today
+            </span>
+          </div>
+        </div>
+      </div>
       <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} className="max-w-full" />
     </div>
   )
