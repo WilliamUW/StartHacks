@@ -186,7 +186,7 @@ export default function PortfolioChart() {
             }}
             formatter={(value: number, name: string) => [
               formatTooltipValue(value),
-              name === 'portfolio' ? 'Portfolio' : 'S&P 500'
+              name === 'Portfolio'
             ]}
             labelStyle={{ color: 'rgba(255, 255, 255, 0.7)', marginBottom: '4px', fontWeight: 500 }}
             itemStyle={{ color: 'rgba(255, 255, 255, 0.9)', padding: '2px 0' }}

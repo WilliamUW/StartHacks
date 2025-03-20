@@ -38,6 +38,7 @@ import PortfolioChart from "@/components/portfolio-chart"
 import PortfolioPieChart from "@/components/portfolio-pie-chart"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { v4 as uuidv4 } from 'uuid'
 
 type MessageType =
   | "text"
@@ -377,154 +378,127 @@ export default function Home() {
     }
   }
 
-  const handleClientInfoRequest = () => {
-    // Create a thinking message first
+  // Helper to wait for a specified time (ms)
+  const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const handleClientInfoRequest = async () => {
+    // Create the initial thinking message
     const thinkingMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: "Analyzing client information...",
       type: "thinking",
       sender: "agent",
       timestamp: new Date(),
       thinking: [
         {
-          id: "1",
+          id: uuidv4(),
           content: "Retrieving client profile for John Smith",
           status: "loading",
         },
       ],
-    }
+    };
 
-    setMessages((prev) => [...prev, thinkingMessage])
+    setMessages(prev => [...prev, thinkingMessage]);
 
     // Update thinking steps over time
-    setTimeout(() => {
-      setMessages((prev) => {
-        const updated = [...prev]
-        const thinkingIndex = updated.findIndex((m) => m.id === thinkingMessage.id)
-        if (thinkingIndex !== -1) {
-          updated[thinkingIndex] = {
-            ...updated[thinkingIndex],
-            thinking: [
-              {
-                id: "1",
-                content: "Retrieved client profile for John Smith",
-                status: "complete",
-              },
-              {
-                id: "2",
-                content: "Analyzing portfolio performance",
-                status: "loading",
-              },
-            ],
-          }
-        }
-        return updated
-      })
+    await wait(500);
+    setMessages(prev => {
+      const updated = [...prev];
+      const index = updated.findIndex(m => m.id === thinkingMessage.id);
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          thinking: [
+            {
+              id: uuidv4(),
+              content: "Retrieved client profile for John Smith",
+              status: "complete",
+            },
+            {
+              id: uuidv4(),
+              content: "Analyzed portfolio performance",
+              status: "complete",
+              result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
+            },
+            {
+              id: uuidv4(),
+              content: "Checking recent transactions and goals",
+              status: "loading",
+            },
+          ],
+        };
+      }
+      return updated;
+    });
 
-      // Add more thinking steps
-      setTimeout(() => {
-        setMessages((prev) => {
-          const updated = [...prev]
-          const thinkingIndex = updated.findIndex((m) => m.id === thinkingMessage.id)
-          if (thinkingIndex !== -1) {
-            updated[thinkingIndex] = {
-              ...updated[thinkingIndex],
-              thinking: [
-                {
-                  id: "1",
-                  content: "Retrieved client profile for John Smith",
-                  status: "complete",
-                },
-                {
-                  id: "2",
-                  content: "Analyzed portfolio performance",
-                  status: "complete",
-                  result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
-                },
-                {
-                  id: "3",
-                  content: "Checking recent transactions and goals",
-                  status: "loading",
-                },
-              ],
-            }
-          }
-          return updated
-        })
+    await wait(500);
+    setMessages(prev => {
+      const updated = [...prev];
+      const index = updated.findIndex(m => m.id === thinkingMessage.id);
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          thinking: [
+            {
+              id: uuidv4(),
+              content: "Retrieved client profile for John Smith",
+              status: "complete",
+            },
+            {
+              id: uuidv4(),
+              content: "Analyzed portfolio performance",
+              status: "complete",
+              result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
+            },
+            {
+              id: uuidv4(),
+              content: "Checked recent transactions and goals",
+              status: "complete",
+              result: "Recent activity: $50,000 cash position increase for house down payment",
+            },
+          ],
+        };
+      }
+      return updated;
+    });
 
-        // Complete thinking and add client info
-        setTimeout(() => {
-          setMessages((prev) => {
-            const updated = [...prev]
-            const thinkingIndex = updated.findIndex((m) => m.id === thinkingMessage.id)
-            if (thinkingIndex !== -1) {
-              updated[thinkingIndex] = {
-                ...updated[thinkingIndex],
-                thinking: [
-                  {
-                    id: "1",
-                    content: "Retrieved client profile for John Smith",
-                    status: "complete",
-                  },
-                  {
-                    id: "2",
-                    content: "Analyzed portfolio performance",
-                    status: "complete",
-                    result: "Portfolio up 13.2% YTD, outperforming S&P 500 by 2.1%",
-                  },
-                  {
-                    id: "3",
-                    content: "Checked recent transactions and goals",
-                    status: "complete",
-                    result: "Recent activity: $50,000 cash position increase for house down payment",
-                  },
-                ],
-              }
-            }
-            return updated
-          })
+    await wait(300);
+    // Add the final client info message
+    const clientInfoMessage: Message = {
+      id: uuidv4(),
+      content: "Here's John Smith's client information and portfolio overview:",
+      type: "client-info",
+      sender: "agent",
+      timestamp: new Date(),
+      data: {
+        name: "John Smith",
+        portfolioValue: "$2,437,890",
+        ytdReturn: "+13.2%",
+        lastContact: "March 5, 2025",
+        goals: [
+          { title: "House Down Payment", amount: "$150,000", deadline: "2026", progress: 67 },
+          { title: "Children's College Fund", amount: "$250,000", deadline: "2030", progress: 35 },
+          { title: "Early Retirement", amount: "$3,500,000", deadline: "2045", progress: 28 },
+        ],
+        recentActivity: "Increased cash position by $50,000 for house down payment",
+      },
+    };
 
-          // Add the final client info message
-          setTimeout(() => {
-            const clientInfoMessage: Message = {
-              id: Date.now().toString(),
-              content: "Here's John Smith's client information and portfolio overview:",
-              type: "client-info",
-              sender: "agent",
-              timestamp: new Date(),
-              data: {
-                name: "John Smith",
-                portfolioValue: "$2,437,890",
-                ytdReturn: "+13.2%",
-                lastContact: "March 5, 2025",
-                goals: [
-                  { title: "House Down Payment", amount: "$150,000", deadline: "2026", progress: 67 },
-                  { title: "Children's College Fund", amount: "$250,000", deadline: "2030", progress: 35 },
-                  { title: "Early Retirement", amount: "$3,500,000", deadline: "2045", progress: 28 },
-                ],
-                recentActivity: "Increased cash position by $50,000 for house down payment",
-              },
-            }
-
-            setMessages((prev) => [...prev, clientInfoMessage])
-            setIsLoading(false)
-          }, 300)
-        }, 500)
-      }, 500)
-    }, 500)
-  }
+    setMessages(prev => [...prev, clientInfoMessage]);
+    setIsLoading(false);
+  };
 
   const handleStockInfoRequest = () => {
     // Create a thinking message first
     const thinkingMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: "Analyzing Apple stock...",
       type: "thinking",
       sender: "agent",
       timestamp: new Date(),
       thinking: [
         {
-          id: "1",
+          id: uuidv4(),
           content: "Retrieving current stock data for AAPL",
           status: "loading",
         },
@@ -543,13 +517,13 @@ export default function Home() {
             ...updated[thinkingIndex],
             thinking: [
               {
-                id: "1",
+                id: uuidv4(),
                 content: "Retrieved current stock data for AAPL",
                 status: "complete",
                 result: "Current price: $187.68, Change: +$1.23 (+0.66%)",
               },
               {
-                id: "2",
+                id: uuidv4(),
                 content: "Analyzing recent financial performance",
                 status: "loading",
               },
@@ -569,19 +543,19 @@ export default function Home() {
               ...updated[thinkingIndex],
               thinking: [
                 {
-                  id: "1",
+                  id: uuidv4(),
                   content: "Retrieved current stock data for AAPL",
                   status: "complete",
                   result: "Current price: $187.68, Change: +$1.23 (+0.66%)",
                 },
                 {
-                  id: "2",
+                  id: uuidv4(),
                   content: "Analyzed recent financial performance",
                   status: "complete",
                   result: "Q1 2025 EPS: $1.52 (beat by $0.12), Revenue: $94.8B (beat by $2.1B)",
                 },
                 {
-                  id: "3",
+                  id: uuidv4(),
                   content: "Checking analyst recommendations",
                   status: "loading",
                 },
@@ -601,25 +575,25 @@ export default function Home() {
                 ...updated[thinkingIndex],
                 thinking: [
                   {
-                    id: "1",
+                    id: uuidv4(),
                     content: "Retrieved current stock data for AAPL",
                     status: "complete",
                     result: "Current price: $187.68, Change: +$1.23 (+0.66%)",
                   },
                   {
-                    id: "2",
+                    id: uuidv4(),
                     content: "Analyzed recent financial performance",
                     status: "complete",
                     result: "Q1 2025 EPS: $1.52 (beat by $0.12), Revenue: $94.8B (beat by $2.1B)",
                   },
                   {
-                    id: "3",
+                    id: uuidv4(),
                     content: "Checked analyst recommendations",
                     status: "complete",
                     result: "Consensus: Buy (32 analysts), Average price target: $215.45",
                   },
                   {
-                    id: "4",
+                    id: uuidv4(),
                     content: "Evaluating alignment with client preferences",
                     status: "complete",
                     result: "72% match with John Smith's preferences (Environmental Sustainability, Technology sector)",
@@ -633,7 +607,7 @@ export default function Home() {
           // Add the final stock info message
           setTimeout(() => {
             const stockInfoMessage: Message = {
-              id: Date.now().toString(),
+              id: uuidv4(),
               content: "Here's the analysis for Apple Inc. (AAPL):",
               type: "stock-info",
               sender: "agent",
@@ -679,14 +653,14 @@ export default function Home() {
   const handlePortfolioRequest = () => {
     // Create a thinking message first
     const thinkingMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: "Analyzing portfolio performance...",
       type: "thinking",
       sender: "agent",
       timestamp: new Date(),
       thinking: [
         {
-          id: "1",
+          id: uuidv4(),
           content: "Retrieving portfolio data for John Smith",
           status: "loading",
         },
@@ -705,12 +679,12 @@ export default function Home() {
             ...updated[thinkingIndex],
             thinking: [
               {
-                id: "1",
+                id: uuidv4(),
                 content: "Retrieved portfolio data for John Smith",
                 status: "complete",
               },
               {
-                id: "2",
+                id: uuidv4(),
                 content: "Calculating performance metrics",
                 status: "loading",
               },
@@ -730,18 +704,18 @@ export default function Home() {
               ...updated[thinkingIndex],
               thinking: [
                 {
-                  id: "1",
+                  id: uuidv4(),
                   content: "Retrieved portfolio data for John Smith",
                   status: "complete",
                 },
                 {
-                  id: "2",
+                  id: uuidv4(),
                   content: "Calculated performance metrics",
                   status: "complete",
                   result: "YTD Return: +13.2%, Volatility: 12.4%, Sharpe Ratio: 1.8",
                 },
                 {
-                  id: "3",
+                  id: uuidv4(),
                   content: "Analyzing asset allocation",
                   status: "loading",
                 },
@@ -761,24 +735,24 @@ export default function Home() {
                 ...updated[thinkingIndex],
                 thinking: [
                   {
-                    id: "1",
+                    id: uuidv4(),
                     content: "Retrieved portfolio data for John Smith",
                     status: "complete",
                   },
                   {
-                    id: "2",
+                    id: uuidv4(),
                     content: "Calculated performance metrics",
                     status: "complete",
                     result: "YTD Return: +13.2%, Volatility: 12.4%, Sharpe Ratio: 1.8",
                   },
                   {
-                    id: "3",
+                    id: uuidv4(),
                     content: "Analyzed asset allocation",
                     status: "complete",
                     result: "Stocks: 45%, Bonds: 25%, ETFs: 15%, Cash: 10%, Alternatives: 5%",
                   },
                   {
-                    id: "4",
+                    id: uuidv4(),
                     content: "Identifying top performers and underperformers",
                     status: "complete",
                     result: "Top: Technology Sector (+18.7%), Bottom: Utilities Sector (-0.8%)",
@@ -792,7 +766,7 @@ export default function Home() {
           // Add the final portfolio info message
           setTimeout(() => {
             const portfolioInfoMessage: Message = {
-              id: Date.now().toString(),
+              id: uuidv4(),
               content: "Here's John Smith's portfolio performance analysis:",
               type: "portfolio-info",
               sender: "agent",
@@ -833,14 +807,14 @@ export default function Home() {
   const handleExcelRequest = () => {
     // Create a thinking message first
     const thinkingMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: "Generating Excel report...",
       type: "thinking",
       sender: "agent",
       timestamp: new Date(),
       thinking: [
         {
-          id: "1",
+          id: uuidv4(),
           content: "Retrieving portfolio data for Excel report",
           status: "loading",
         },
@@ -859,12 +833,12 @@ export default function Home() {
             ...updated[thinkingIndex],
             thinking: [
               {
-                id: "1",
+                id: uuidv4(),
                 content: "Retrieved portfolio data for Excel report",
                 status: "complete",
               },
               {
-                id: "2",
+                id: uuidv4(),
                 content: "Formatting portfolio holdings sheet",
                 status: "loading",
               },
@@ -884,17 +858,17 @@ export default function Home() {
               ...updated[thinkingIndex],
               thinking: [
                 {
-                  id: "1",
+                  id: uuidv4(),
                   content: "Retrieved portfolio data for Excel report",
                   status: "complete",
                 },
                 {
-                  id: "2",
+                  id: uuidv4(),
                   content: "Formatted portfolio holdings sheet",
                   status: "complete",
                 },
                 {
-                  id: "3",
+                  id: uuidv4(),
                   content: "Creating performance analysis sheet",
                   status: "loading",
                 },
@@ -914,27 +888,27 @@ export default function Home() {
                 ...updated[thinkingIndex],
                 thinking: [
                   {
-                    id: "1",
+                    id: uuidv4(),
                     content: "Retrieved portfolio data for Excel report",
                     status: "complete",
                   },
                   {
-                    id: "2",
+                    id: uuidv4(),
                     content: "Formatted portfolio holdings sheet",
                     status: "complete",
                   },
                   {
-                    id: "3",
+                    id: uuidv4(),
                     content: "Created performance analysis sheet",
                     status: "complete",
                   },
                   {
-                    id: "4",
+                    id: uuidv4(),
                     content: "Added tax analysis and allocation sheets",
                     status: "complete",
                   },
                   {
-                    id: "5",
+                    id: uuidv4(),
                     content: "Applied formatting and formulas",
                     status: "complete",
                   },
@@ -947,7 +921,7 @@ export default function Home() {
           // Add the final Excel preview message
           setTimeout(() => {
             const excelPreviewMessage: Message = {
-              id: Date.now().toString(),
+              id: uuidv4(),
               content: "I've generated a comprehensive Excel report for John Smith's portfolio:",
               type: "excel-preview",
               sender: "agent",
@@ -979,14 +953,14 @@ export default function Home() {
   const handlePowerPointRequest = (clientName = "John Smith") => {
     // Create a thinking message first
     const thinkingMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: `Creating PowerPoint presentation for ${clientName}...`,
       type: "thinking",
       sender: "agent",
       timestamp: new Date(),
       thinking: [
         {
-          id: "1",
+          id: uuidv4(),
           content: `Retrieving portfolio data for ${clientName}`,
           status: "loading",
         },
@@ -1013,7 +987,7 @@ export default function Home() {
       // Simulate further steps
       setTimeout(() => {
         const powerPointPreviewMessage: Message = {
-          id: Date.now().toString(),
+          id: uuidv4(),
           content: `I've created a professional PowerPoint presentation for ${clientName}'s portfolio review:`,
           type: "powerpoint-preview",
           sender: "agent",
@@ -1046,14 +1020,14 @@ export default function Home() {
   const handleFinancialAdviceRequest = () => {
     // Create a thinking message first
     const thinkingMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: "Analyzing investment opportunity...",
       type: "thinking",
       sender: "agent",
       timestamp: new Date(),
       thinking: [
         {
-          id: "1",
+          id: uuidv4(),
           content: "Retrieving market data and trends",
           status: "loading",
         },
@@ -1072,12 +1046,12 @@ export default function Home() {
             ...updated[thinkingIndex],
             thinking: [
               {
-                id: "1",
+                id: uuidv4(),
                 content: "Retrieved market data and trends",
                 status: "complete",
               },
               {
-                id: "2",
+                id: uuidv4(),
                 content: "Analyzing client's current portfolio allocation",
                 status: "loading",
               },
@@ -1097,18 +1071,18 @@ export default function Home() {
               ...updated[thinkingIndex],
               thinking: [
                 {
-                  id: "1",
+                  id: uuidv4(),
                   content: "Retrieved market data and trends",
                   status: "complete",
                 },
                 {
-                  id: "2",
+                  id: uuidv4(),
                   content: "Analyzing client's current portfolio allocation",
                   status: "complete",
                   result: "Current tech allocation: 32%, Target allocation: 25-35%",
                 },
                 {
-                  id: "3",
+                  id: uuidv4(),
                   content: "Evaluating risk profile and investment goals",
                   status: "loading",
                 },
@@ -1128,30 +1102,30 @@ export default function Home() {
                 ...updated[thinkingIndex],
                 thinking: [
                   {
-                    id: "1",
+                    id: uuidv4(),
                     content: "Retrieved market data and trends",
                     status: "complete",
                   },
                   {
-                    id: "2",
+                    id: uuidv4(),
                     content: "Analyzed client's current portfolio allocation",
                     status: "complete",
                     result: "Current tech allocation: 32%, Target allocation: 25-35%",
                   },
                   {
-                    id: "3",
+                    id: uuidv4(),
                     content: "Evaluated risk profile and investment goals",
                     status: "complete",
                     result: "Risk tolerance: Moderate, Primary goal: House down payment (2026)",
                   },
                   {
-                    id: "4",
+                    id: uuidv4(),
                     content: "Checking alignment with ESG preferences",
                     status: "complete",
                     result: "72% match with environmental sustainability preferences",
                   },
                   {
-                    id: "5",
+                    id: uuidv4(),
                     content: "Formulating recommendation",
                     status: "complete",
                   },
@@ -1164,7 +1138,7 @@ export default function Home() {
           // Add the final financial advice message
           setTimeout(() => {
             const financialAdviceMessage: Message = {
-              id: Date.now().toString(),
+              id: uuidv4(),
               content: "Based on my analysis, here's my recommendation regarding Apple stock (AAPL):",
               type: "financial-advice",
               sender: "agent",
@@ -1561,15 +1535,14 @@ export default function Home() {
                       {message.data.sheets.map((sheet: string, index: number) => (
                         <div key={index} className="flex items-center p-2 hover:bg-muted/30 rounded-md text-sm">
                           <div
-                            className={`w-3 h-3 rounded-sm mr-2 ${
-                              index === 0
-                                ? "bg-green-500"
-                                : index === 1
-                                  ? "bg-blue-500"
-                                  : index === 2
-                                    ? "bg-purple-500"
-                                    : "bg-amber-500"
-                            }`}
+                            className={`w-3 h-3 rounded-sm mr-2 ${index === 0
+                              ? "bg-green-500"
+                              : index === 1
+                                ? "bg-blue-500"
+                                : index === 2
+                                  ? "bg-purple-500"
+                                  : "bg-amber-500"
+                              }`}
                           ></div>
                           {sheet}
                         </div>
@@ -1930,9 +1903,8 @@ export default function Home() {
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[90%] rounded-lg p-4 ${
-                    message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
-                  }`}
+                  className={`max-w-[90%] rounded-lg p-4 ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
+                    }`}
                 >
                   {message.sender === "agent" && (
                     <div className="flex items-center mb-2">
@@ -1944,9 +1916,8 @@ export default function Home() {
                   {renderMessageContent(message)}
 
                   <div
-                    className={`text-xs mt-2 ${
-                      message.sender === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
-                    }`}
+                    className={`text-xs mt-2 ${message.sender === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
+                      }`}
                   >
                     {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
