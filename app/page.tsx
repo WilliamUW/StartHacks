@@ -1994,8 +1994,8 @@ export default function Home() {
     <main className="flex flex-col h-screen bg-background text-foreground">
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Voice activation overlay - shown when voice mode is active */}
-        {voiceMode !== "idle" && (
+        {/* Voice activation overlay - shown only during listening and processing */}
+        {(voiceMode === "listening" || voiceMode === "processing") && (
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
             <div className="absolute inset-0 overflow-hidden">
               {/* Animated background elements */}
@@ -2048,22 +2048,12 @@ export default function Home() {
 
             <div className="text-center mb-8 z-10">
               <h3 className="text-3xl font-medium mb-2 text-white">
-                {voiceMode === "idle"
-                  ? "Tap to speak"
-                  : voiceMode === "listening"
-                    ? "Listening..."
-                    : voiceMode === "processing"
-                      ? "Processing..."
-                      : "Speaking..."}
+                {voiceMode === "listening" ? "Listening..." : "Processing..."}
               </h3>
               <p className="text-xl text-white/70">
-                {voiceMode === "idle"
-                  ? "Ask Terminal Six about your finances"
-                  : voiceMode === "listening"
-                    ? "Say something like 'Show me John's portfolio'"
-                    : voiceMode === "processing"
-                      ? "Analyzing your request"
-                      : "Terminal Six is responding"}
+                {voiceMode === "listening"
+                  ? "Say something like 'Show me John's portfolio'"
+                  : "Analyzing your request"}
               </p>
             </div>
 
