@@ -452,13 +452,13 @@ export default function Home() {
       handleClientTransactionRequest("207.38 AAPL Shares ($50,000) has been sold");
     } else if (lowerMessage.includes("transfer")) {
       handleClientTransactionRequest("$50,000 has been transfered to Jane's checking account ending in 0836.");
+    } else if (lowerMessage.includes("jane")) {
+      handleClientInfoRequest();
     } else if (
       lowerMessage.includes("aapl") ||
       lowerMessage.includes("apple")
     ) {
       handleStockInfoRequest();
-    } else if (lowerMessage.includes("jane")) {
-      handleClientInfoRequest();
     } else {
       // Generic response
       const response = await fetch("/api/llm", {
