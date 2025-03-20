@@ -112,99 +112,35 @@ export default function StockSummary({
       </Card>
     );
   }
-
-  if (isLoading) {
-    return (
-      <>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <div className="text-xs text-muted-foreground">Price</div>
-                <Skeleton className="h-7 w-24 mt-1" />
-                <Skeleton className="h-4 w-16 mt-1" />
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Market Cap</div>
-                <Skeleton className="h-7 w-24 mt-1" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Today's Trading
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i}>
-                  <div className="text-xs text-muted-foreground">
-                    {["Open", "High", "Low", "Volume"][i]}
-                  </div>
-                  <Skeleton className="h-5 w-20 mt-1" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Key Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i}>
-                  <div className="text-xs text-muted-foreground">
-                    {["P/E Ratio", "EPS", "Dividend", "Sector"][i]}
-                  </div>
-                  <Skeleton className="h-5 w-20 mt-1" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </>
-    );
-  }
-
   return (
     <>
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Overview
+            Key Metrics
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <div className="text-xs text-muted-foreground">Price</div>
-              <div className="text-xl font-bold">${stock.price.toFixed(2)}</div>
-              <div
-                className={`text-sm ${
-                  isPositive ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {isPositive ? "+" : ""}
-                {stock.changePercent.toFixed(2)}%
+              <div className="text-xs text-muted-foreground">P/E Ratio</div>
+              <div className="text-sm font-medium">
+                {stock.peRatio.toFixed(2)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">EPS</div>
+              <div className="text-sm font-medium">${stock.eps.toFixed(2)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Dividend</div>
+              <div className="text-sm font-medium">
+                ${stock.dividend.toFixed(2)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">Market Cap</div>
-              <div className="text-xl font-bold">${stock.marketCap}</div>
+              <div className="text-sm font-medium">{stock.marketCap}</div>
             </div>
           </div>
         </CardContent>
@@ -239,38 +175,6 @@ export default function StockSummary({
               <div className="text-sm font-medium">
                 {(stock.volume / 1000000).toFixed(1)}M
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Key Metrics
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <div className="text-xs text-muted-foreground">P/E Ratio</div>
-              <div className="text-sm font-medium">
-                {stock.peRatio.toFixed(2)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">EPS</div>
-              <div className="text-sm font-medium">${stock.eps.toFixed(2)}</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Dividend</div>
-              <div className="text-sm font-medium">
-                ${stock.dividend.toFixed(2)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Sector</div>
-              <div className="text-sm font-medium">{stock.sector}</div>
             </div>
           </div>
         </CardContent>
