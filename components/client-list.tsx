@@ -16,7 +16,7 @@ import { useState } from "react"
 const clients = [
   {
     id: 1,
-    name: "Srishti Manivel",
+    name: "Jane Appleseed",
     image: "/clients/client1.png",
     portfolioValue: "$2.4M",
     returnRate: 13.2,
@@ -26,7 +26,7 @@ const clients = [
   },
   {
     id: 2,
-    name: "Sarah Srishtison",
+    name: "Sarah Janeson",
     image: "/clients/client2.png",
     portfolioValue: "$1.8M",
     returnRate: 8.7,

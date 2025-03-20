@@ -103,11 +103,11 @@ export default function Dashboard() {
       <div className="border-b border-border p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center">
           <Avatar className="h-12 w-12 mr-4">
-            <AvatarImage src="/clients/client1.png" alt="Srishti Manivel" />
+            <AvatarImage src="/clients/client1.png" alt="Jane Appleseed" />
             <AvatarFallback>JS</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">Srishti Manivel</h1>
+            <h1 className="text-2xl font-bold">Jane Appleseed</h1>
             <div className="flex items-center text-sm text-muted-foreground">
               <span className="mr-3">Portfolio: $2,437,890</span>
               <Badge variant="outline" className="bg-green-500/10 text-green-500 flex items-center">
@@ -333,7 +333,7 @@ export default function Dashboard() {
               <Card>
                 <CardHeader>
                   <CardTitle>Financial Roadmap</CardTitle>
-                  <CardDescription>Srishti's journey to financial goals</CardDescription>
+                  <CardDescription>Jane's journey to financial goals</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[600px]">

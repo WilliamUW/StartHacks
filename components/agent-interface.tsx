@@ -46,7 +46,7 @@ export default function AgentInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello, I'm Terminal Six AI. How can I assist you with Srishti Manivel's portfolio today?",
+      content: "Hello, I'm Terminal Six AI. How can I assist you with Jane Appleseed's portfolio today?",
       sender: "agent",
       timestamp: new Date(),
     },
@@ -152,16 +152,16 @@ export default function AgentInterface() {
         inputValue.toLowerCase().includes("50k")
       ) {
         response =
-          "Based on Srishti's goal to save for a house down payment, I've analyzed his portfolio and recommend selling the following positions to generate $50,000 in cash:\n\n• AAPL: 50 shares ($10,500)\n• MSFT: 25 shares ($9,750)\n• VTI: 100 shares ($24,800)\n• VXUS: 50 shares ($5,250)\n\nTotal: $50,300\n\nThis rebalancing maintains his overall asset allocation while slightly reducing exposure to technology. Would you like me to execute these trades?"
+          "Based on Jane's goal to save for a house down payment, I've analyzed his portfolio and recommend selling the following positions to generate $50,000 in cash:\n\n• AAPL: 50 shares ($10,500)\n• MSFT: 25 shares ($9,750)\n• VTI: 100 shares ($24,800)\n• VXUS: 50 shares ($5,250)\n\nTotal: $50,300\n\nThis rebalancing maintains his overall asset allocation while slightly reducing exposure to technology. Would you like me to execute these trades?"
       } else if (inputValue.toLowerCase().includes("portfolio") || inputValue.toLowerCase().includes("performance")) {
         response =
-          "Srishti's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%). His fixed income allocation has underperformed (-0.8%) due to rising interest rates."
+          "Jane's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%). His fixed income allocation has underperformed (-0.8%) due to rising interest rates."
       } else if (inputValue.toLowerCase().includes("report") || inputValue.toLowerCase().includes("document")) {
         response =
-          "I've generated a comprehensive portfolio report for Srishti Manivel. The report includes:\n\n• Current asset allocation\n• YTD performance analysis\n• Recent transactions\n• Progress toward financial goals\n• Tax implications of recent trades\n\nWould you like me to send this report to Srishti via email or would you prefer to download it now?"
+          "I've generated a comprehensive portfolio report for Jane Appleseed. The report includes:\n\n• Current asset allocation\n• YTD performance analysis\n• Recent transactions\n• Progress toward financial goals\n• Tax implications of recent trades\n\nWould you like me to send this report to Jane via email or would you prefer to download it now?"
       } else {
         response =
-          "I understand you're looking for information about Srishti Manivel's portfolio. How specifically can I help you today? I can provide portfolio analysis, suggest rebalancing options, generate reports, or help with other financial planning tasks."
+          "I understand you're looking for information about Jane Appleseed's portfolio. How specifically can I help you today? I can provide portfolio analysis, suggest rebalancing options, generate reports, or help with other financial planning tasks."
       }
 
       const agentMessage: Message = {
@@ -194,7 +194,7 @@ export default function AgentInterface() {
           // Add a simulated voice message
           const userMessage: Message = {
             id: Date.now().toString(),
-            content: "Show me Srishti's portfolio performance",
+            content: "Show me Jane's portfolio performance",
             sender: "user",
             timestamp: new Date(),
           }
@@ -206,7 +206,7 @@ export default function AgentInterface() {
             const agentMessage: Message = {
               id: Date.now().toString(),
               content:
-                "Srishti's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%).",
+                "Jane's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%).",
               sender: "agent",
               timestamp: new Date(),
             }
@@ -244,14 +244,14 @@ export default function AgentInterface() {
     else if (lowerMessage.startsWith("/create powerpoint") || lowerMessage.includes("powerpoint")) {
       // Extract client name if present
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/)
-      const clientName = clientMatch ? clientMatch[1].trim() : "Srishti Manivel" // Default to Srishti Manivel if no client specified
+      const clientName = clientMatch ? clientMatch[1].trim() : "Jane Appleseed" // Default to Jane Appleseed if no client specified
       handlePowerPointRequest(clientName)
     } else {
       // Default response
     }
   }
 
-  const handlePowerPointRequest = (clientName = "Srishti Manivel") => {
+  const handlePowerPointRequest = (clientName = "Jane Appleseed") => {
     // Create a thinking message first
     const thinkingMessage: Message = {
       id: Date.now().toString(),
@@ -648,7 +648,7 @@ export default function AgentInterface() {
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {voiceMode === "idle"
-                        ? "Ask Terminal Six about Srishti's portfolio"
+                        ? "Ask Terminal Six about Jane's portfolio"
                         : voiceMode === "listening"
                           ? "Say something like 'Show me portfolio performance'"
                           : voiceMode === "processing"
