@@ -1,31 +1,31 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
 import {
-  Send,
-  Sparkles,
-  Paperclip,
-  Maximize2,
-  Minimize2,
-  X,
-  Loader2,
-  MessageSquare,
-  Mic,
-  MicOff,
-  Volume2,
+  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   FileText,
-  ArrowUpRight,
+  Loader2,
+  Maximize2,
+  MessageSquare,
+  Mic,
+  MicOff,
+  Minimize2,
+  Paperclip,
   Percent,
+  Send,
+  Sparkles,
+  Volume2,
+  X,
 } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useRef, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import type React from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 type Message = {
@@ -46,7 +46,7 @@ export default function AgentInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello, I'm Terminal Six AI. How can I assist you with John Smith's portfolio today?",
+      content: "Hello, I'm Terminal Six AI. How can I assist you with Srishti Manivel's portfolio today?",
       sender: "agent",
       timestamp: new Date(),
     },
@@ -152,16 +152,16 @@ export default function AgentInterface() {
         inputValue.toLowerCase().includes("50k")
       ) {
         response =
-          "Based on John's goal to save for a house down payment, I've analyzed his portfolio and recommend selling the following positions to generate $50,000 in cash:\n\n• AAPL: 50 shares ($10,500)\n• MSFT: 25 shares ($9,750)\n• VTI: 100 shares ($24,800)\n• VXUS: 50 shares ($5,250)\n\nTotal: $50,300\n\nThis rebalancing maintains his overall asset allocation while slightly reducing exposure to technology. Would you like me to execute these trades?"
+          "Based on Srishti's goal to save for a house down payment, I've analyzed his portfolio and recommend selling the following positions to generate $50,000 in cash:\n\n• AAPL: 50 shares ($10,500)\n• MSFT: 25 shares ($9,750)\n• VTI: 100 shares ($24,800)\n• VXUS: 50 shares ($5,250)\n\nTotal: $50,300\n\nThis rebalancing maintains his overall asset allocation while slightly reducing exposure to technology. Would you like me to execute these trades?"
       } else if (inputValue.toLowerCase().includes("portfolio") || inputValue.toLowerCase().includes("performance")) {
         response =
-          "John's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%). His fixed income allocation has underperformed (-0.8%) due to rising interest rates."
+          "Srishti's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%). His fixed income allocation has underperformed (-0.8%) due to rising interest rates."
       } else if (inputValue.toLowerCase().includes("report") || inputValue.toLowerCase().includes("document")) {
         response =
-          "I've generated a comprehensive portfolio report for John Smith. The report includes:\n\n• Current asset allocation\n• YTD performance analysis\n• Recent transactions\n• Progress toward financial goals\n• Tax implications of recent trades\n\nWould you like me to send this report to John via email or would you prefer to download it now?"
+          "I've generated a comprehensive portfolio report for Srishti Manivel. The report includes:\n\n• Current asset allocation\n• YTD performance analysis\n• Recent transactions\n• Progress toward financial goals\n• Tax implications of recent trades\n\nWould you like me to send this report to Srishti via email or would you prefer to download it now?"
       } else {
         response =
-          "I understand you're looking for information about John Smith's portfolio. How specifically can I help you today? I can provide portfolio analysis, suggest rebalancing options, generate reports, or help with other financial planning tasks."
+          "I understand you're looking for information about Srishti Manivel's portfolio. How specifically can I help you today? I can provide portfolio analysis, suggest rebalancing options, generate reports, or help with other financial planning tasks."
       }
 
       const agentMessage: Message = {
@@ -194,7 +194,7 @@ export default function AgentInterface() {
           // Add a simulated voice message
           const userMessage: Message = {
             id: Date.now().toString(),
-            content: "Show me John's portfolio performance",
+            content: "Show me Srishti's portfolio performance",
             sender: "user",
             timestamp: new Date(),
           }
@@ -206,7 +206,7 @@ export default function AgentInterface() {
             const agentMessage: Message = {
               id: Date.now().toString(),
               content:
-                "John's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%).",
+                "Srishti's portfolio has returned 13.2% YTD, outperforming the S&P 500 by 2.1%. The strongest performers have been his technology holdings (+18.7%) and healthcare stocks (+15.2%).",
               sender: "agent",
               timestamp: new Date(),
             }
@@ -244,14 +244,14 @@ export default function AgentInterface() {
     else if (lowerMessage.startsWith("/create powerpoint") || lowerMessage.includes("powerpoint")) {
       // Extract client name if present
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/)
-      const clientName = clientMatch ? clientMatch[1].trim() : "John Smith" // Default to John Smith if no client specified
+      const clientName = clientMatch ? clientMatch[1].trim() : "Srishti Manivel" // Default to Srishti Manivel if no client specified
       handlePowerPointRequest(clientName)
     } else {
       // Default response
     }
   }
 
-  const handlePowerPointRequest = (clientName = "John Smith") => {
+  const handlePowerPointRequest = (clientName = "Srishti Manivel") => {
     // Create a thinking message first
     const thinkingMessage: Message = {
       id: Date.now().toString(),
@@ -648,7 +648,7 @@ export default function AgentInterface() {
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {voiceMode === "idle"
-                        ? "Ask Terminal Six about John's portfolio"
+                        ? "Ask Terminal Six about Srishti's portfolio"
                         : voiceMode === "listening"
                           ? "Say something like 'Show me portfolio performance'"
                           : voiceMode === "processing"

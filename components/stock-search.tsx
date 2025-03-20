@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Search, Loader2, TrendingUp, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Loader2, Search, TrendingUp, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 
 // Mock stock data
@@ -18,7 +19,7 @@ const stocksData = [
   { symbol: "NVDA", name: "NVIDIA Corporation", price: 950.02, change: 15.67 },
   { symbol: "JPM", name: "JPMorgan Chase & Co.", price: 198.47, change: 0.89 },
   { symbol: "V", name: "Visa Inc.", price: 275.31, change: 1.05 },
-  { symbol: "JNJ", name: "Johnson & Johnson", price: 147.89, change: -0.32 },
+  { symbol: "JNJ", name: "Srishtison & Srishtison", price: 147.89, change: -0.32 },
 ]
 
 export default function StockSearch() {

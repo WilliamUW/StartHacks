@@ -126,8 +126,8 @@ export default function Home() {
   const suggestedCommands: SuggestedCommand[] = [
     // Client commands
     {
-      command: "/client John Smith",
-      description: "View John Smith's portfolio and information",
+      command: "/client Srishti Manivel",
+      description: "View Srishti Manivel's portfolio and information",
       icon: (
         <Avatar className="h-4 w-4">
           <AvatarFallback>JS</AvatarFallback>
@@ -136,8 +136,8 @@ export default function Home() {
       category: "client",
     },
     {
-      command: "/client Sarah Johnson",
-      description: "View Sarah Johnson's portfolio and information",
+      command: "/client Sarah Srishtison",
+      description: "View Sarah Srishtison's portfolio and information",
       icon: (
         <Avatar className="h-4 w-4">
           <AvatarFallback>SJ</AvatarFallback>
@@ -216,8 +216,8 @@ export default function Home() {
       category: "document",
     },
     {
-      command: "/create powerpoint John Smith",
-      description: "Generate PowerPoint presentation for John Smith",
+      command: "/create powerpoint Srishti Manivel",
+      description: "Generate PowerPoint presentation for Srishti Manivel",
       icon: <FileText className="h-4 w-4" />,
       category: "document",
     },
@@ -275,7 +275,7 @@ export default function Home() {
 
   // Define the core commands that will appear in the "All" tab
   const coreCommands = [
-    "/client John Smith",
+    "/client Srishti Manivel",
     "/stock AAPL",
     "/create excel",
     "/portfolio analysis",
@@ -428,7 +428,7 @@ export default function Home() {
     // Check for commands
     if (
       lowerMessage.startsWith("/client") ||
-      lowerMessage.includes("john smith")
+      lowerMessage.includes("Srishti Manivel")
     ) {
       handleClientInfoRequest();
     } else if (
@@ -448,7 +448,7 @@ export default function Home() {
     ) {
       // Extract client name if present
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/);
-      const clientName = clientMatch ? clientMatch[1].trim() : "John Smith"; // Default to John Smith if no client specified
+      const clientName = clientMatch ? clientMatch[1].trim() : "Srishti Manivel"; // Default to Srishti Manivel if no client specified
       handlePowerPointRequest(clientName);
     } else if (
       lowerMessage.startsWith("/portfolio") ||
@@ -488,7 +488,7 @@ export default function Home() {
           const agentMessage: Message = {
             id: Date.now().toString(),
             content:
-              "I understand you're asking about financial information. Could you be more specific? You can try commands like '/client John Smith', '/stock AAPL', or ask about portfolio performance.",
+              "I understand you're asking about financial information. Could you be more specific? You can try commands like '/client Srishti Manivel', '/stock AAPL', or ask about portfolio performance.",
             type: "text",
             sender: "agent",
             timestamp: new Date(),
@@ -515,7 +515,7 @@ export default function Home() {
       thinking: [
         {
           id: uuidv4(),
-          content: "Retrieving client profile for John Smith",
+          content: "Retrieving client profile for Srishti Manivel",
           status: "loading",
         },
       ],
@@ -534,7 +534,7 @@ export default function Home() {
           thinking: [
             {
               id: uuidv4(),
-              content: "Retrieved client profile for John Smith",
+              content: "Retrieved client profile for Srishti Manivel",
               status: "complete",
             },
             {
@@ -564,7 +564,7 @@ export default function Home() {
           thinking: [
             {
               id: uuidv4(),
-              content: "Retrieved client profile for John Smith",
+              content: "Retrieved client profile for Srishti Manivel",
               status: "complete",
             },
             {
@@ -590,12 +590,12 @@ export default function Home() {
     // Add the final client info message
     const clientInfoMessage: Message = {
       id: uuidv4(),
-      content: "Here's John Smith's client information and portfolio overview:",
+      content: "Here's Srishti Manivel's client information and portfolio overview:",
       type: "client-info",
       sender: "agent",
       timestamp: new Date(),
       data: {
-        name: "John Smith",
+        name: "Srishti Manivel",
         portfolioValue: "$2,437,890",
         ytdReturn: "+13.2%",
         lastContact: "March 5, 2025",
@@ -746,7 +746,7 @@ export default function Home() {
                     content: "Evaluating alignment with client preferences",
                     status: "complete",
                     result:
-                      "72% match with John Smith's preferences (Environmental Sustainability, Technology sector)",
+                      "72% match with Srishti Manivel's preferences (Environmental Sustainability, Technology sector)",
                   },
                 ],
               };
@@ -819,7 +819,7 @@ export default function Home() {
       thinking: [
         {
           id: uuidv4(),
-          content: "Retrieving portfolio data for John Smith",
+          content: "Retrieving portfolio data for Srishti Manivel",
           status: "loading",
         },
       ],
@@ -840,7 +840,7 @@ export default function Home() {
             thinking: [
               {
                 id: uuidv4(),
-                content: "Retrieved portfolio data for John Smith",
+                content: "Retrieved portfolio data for Srishti Manivel",
                 status: "complete",
               },
               {
@@ -867,7 +867,7 @@ export default function Home() {
               thinking: [
                 {
                   id: uuidv4(),
-                  content: "Retrieved portfolio data for John Smith",
+                  content: "Retrieved portfolio data for Srishti Manivel",
                   status: "complete",
                 },
                 {
@@ -901,7 +901,7 @@ export default function Home() {
                 thinking: [
                   {
                     id: uuidv4(),
-                    content: "Retrieved portfolio data for John Smith",
+                    content: "Retrieved portfolio data for Srishti Manivel",
                     status: "complete",
                   },
                   {
@@ -935,7 +935,7 @@ export default function Home() {
           setTimeout(() => {
             const portfolioInfoMessage: Message = {
               id: uuidv4(),
-              content: "Here's John Smith's portfolio performance analysis:",
+              content: "Here's Srishti Manivel's portfolio performance analysis:",
               type: "portfolio-info",
               sender: "agent",
               timestamp: new Date(),
@@ -1115,12 +1115,12 @@ export default function Home() {
           setTimeout(() => {
             const excelPreviewMessage: Message = {
               id: uuidv4(),
-              content: "I've generated a comprehensive Excel report for John Smith's portfolio:",
+              content: "I've generated a comprehensive Excel report for Srishti Manivel's portfolio:",
               type: "excel-preview",
               sender: "agent",
               timestamp: new Date(),
               data: {
-                fileName: "John_Smith_Portfolio_Analysis.xlsx",
+                fileName: "Srishti_Smith_Portfolio_Analysis.xlsx",
                 sheets: [
                   "Holdings",
                   "Performance",
@@ -1148,7 +1148,7 @@ export default function Home() {
   };
 
   // Update the handlePowerPointRequest function to accept a client name parameter
-  const handlePowerPointRequest = (clientName = "John Smith") => {
+  const handlePowerPointRequest = (clientName = "Srishti Manivel") => {
     // Create a thinking message first
     const thinkingMessage: Message = {
       id: uuidv4(),
@@ -2102,7 +2102,7 @@ export default function Home() {
               </h3>
               <p className="text-xl text-white/70">
                 {voiceMode === "listening"
-                  ? "Say something like 'Show me John's portfolio'"
+                  ? "Say something like 'Show me Srishti's portfolio'"
                   : "Analyzing your request"}
               </p>
             </div>

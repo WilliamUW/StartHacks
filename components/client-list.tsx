@@ -1,21 +1,22 @@
 "use client"
 
-import { useState } from "react"
-import { Search, Users, Star, Clock, Settings, Bell } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { ModeToggle } from "@/components/mode-toggle"
-import { Button } from "@/components/ui/button"
+import { Bell, Clock, Search, Settings, Star, Users } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ModeToggle } from "@/components/mode-toggle"
 import { NotificationSummary } from "@/components/notification-summary"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 const clients = [
   {
     id: 1,
-    name: "John Smith",
+    name: "Srishti Manivel",
     image: "/clients/client1.png",
     portfolioValue: "$2.4M",
     returnRate: 13.2,
@@ -25,7 +26,7 @@ const clients = [
   },
   {
     id: 2,
-    name: "Sarah Johnson",
+    name: "Sarah Srishtison",
     image: "/clients/client2.png",
     portfolioValue: "$1.8M",
     returnRate: 8.7,

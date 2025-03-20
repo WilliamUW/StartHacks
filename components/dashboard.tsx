@@ -1,30 +1,31 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  TrendingUp,
   AlertCircle,
   ArrowUpRight,
-  FileText,
   BarChart3,
-  PieChart,
   FileIcon as FilePresentation,
+  FileText,
+  PieChart,
+  TrendingUp,
 } from "lucide-react"
-import PortfolioChart from "@/components/portfolio-chart"
-import PortfolioPieChart from "@/components/portfolio-pie-chart"
-import NewsCard from "@/components/news-card"
-import StockSearch from "@/components/stock-search"
-import Link from "next/link"
-import PortfolioGlobe from "@/components/portfolio-globe"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import ExcelIntegration from "@/components/excel-integration"
-import { NotificationSummary } from "@/components/notification-summary"
 import FinancialRoadmap from "@/components/financial-roadmap"
+import Link from "next/link"
+import NewsCard from "@/components/news-card"
+import { NotificationSummary } from "@/components/notification-summary"
+import PortfolioChart from "@/components/portfolio-chart"
+import PortfolioGlobe from "@/components/portfolio-globe"
+import PortfolioPieChart from "@/components/portfolio-pie-chart"
 import PowerPointIntegration from "@/components/powerpoint-integration"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import StockSearch from "@/components/stock-search"
 
 // Mock stock data
 const watchlistStocks = [
@@ -102,11 +103,11 @@ export default function Dashboard() {
       <div className="border-b border-border p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center">
           <Avatar className="h-12 w-12 mr-4">
-            <AvatarImage src="/clients/client1.png" alt="John Smith" />
+            <AvatarImage src="/clients/client1.png" alt="Srishti Manivel" />
             <AvatarFallback>JS</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">John Smith</h1>
+            <h1 className="text-2xl font-bold">Srishti Manivel</h1>
             <div className="flex items-center text-sm text-muted-foreground">
               <span className="mr-3">Portfolio: $2,437,890</span>
               <Badge variant="outline" className="bg-green-500/10 text-green-500 flex items-center">
@@ -332,7 +333,7 @@ export default function Dashboard() {
               <Card>
                 <CardHeader>
                   <CardTitle>Financial Roadmap</CardTitle>
-                  <CardDescription>John's journey to financial goals</CardDescription>
+                  <CardDescription>Srishti's journey to financial goals</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[600px]">

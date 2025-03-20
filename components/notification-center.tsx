@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { Bell, AlertTriangle, Clock, Calendar, TrendingDown, CheckCircle2, X, Users, ShieldAlert } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle, Bell, Calendar, CheckCircle2, Clock, ShieldAlert, TrendingDown, Users, X } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 type NotificationType = "urgent" | "client" | "market" | "compliance" | "task"
 type NotificationPriority = "critical" | "high" | "medium" | "low"
@@ -34,10 +35,10 @@ const notifications: Notification[] = [
     type: "urgent",
     priority: "critical",
     title: "Portfolio Rebalancing Required",
-    description: "John Smith's portfolio is 15% off target allocation due to recent market volatility.",
+    description: "Srishti Manivel's portfolio is 15% off target allocation due to recent market volatility.",
     time: "2 hours ago",
     deadline: "Today",
-    clientName: "John Smith",
+    clientName: "Srishti Manivel",
     isRead: false,
     actions: {
       primary: "Rebalance Now",
@@ -49,10 +50,10 @@ const notifications: Notification[] = [
     type: "compliance",
     priority: "high",
     title: "KYC Update Required",
-    description: "Sarah Johnson's KYC documentation will expire in 5 days.",
+    description: "Sarah Srishtison's KYC documentation will expire in 5 days.",
     time: "1 day ago",
     deadline: "5 days",
-    clientName: "Sarah Johnson",
+    clientName: "Sarah Srishtison",
     isRead: false,
     actions: {
       primary: "Send Reminder",
