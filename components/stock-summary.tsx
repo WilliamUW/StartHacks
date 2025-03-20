@@ -262,21 +262,6 @@ export default function StockSummary({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Future Earnings (2025)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            ${stock.metrics?.earnings || "N/A"}
-          </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Projected Net Profit
-          </div>
-        </CardContent>
-      </Card>
     </>
   );
 }
