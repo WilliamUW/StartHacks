@@ -521,7 +521,7 @@ export default function Home() {
       thinking: [
         {
           id: uuidv4(),
-          content: "Retrieving client profile for John Smith",
+          content: "Retrieving client profile for Jane Smith",
           status: "loading",
         },
       ],
@@ -540,7 +540,7 @@ export default function Home() {
           thinking: [
             {
               id: uuidv4(),
-              content: "Retrieved client profile for John Smith",
+              content: "Retrieved client profile for Jane Smith",
               status: "complete",
             },
             {
@@ -851,8 +851,8 @@ export default function Home() {
                 peRatio: 31.2,
                 dividend: 0.92,
                 eps: 6.02,
-                analystRating: "Buy",
-                priceTarget: 215.45,
+                analystRating: "Hold",
+                priceTarget: 202.45,
                 socialCauses: [
                   "Environmental Sustainability",
                   "Privacy & Data Security",
@@ -1439,13 +1439,13 @@ export default function Home() {
               sender: "agent",
               timestamp: new Date(),
               data: {
-                recommendation: "Hold",
+                recommendation: "Sell",
                 confidence: "Medium",
                 reasoning: [
                   "Apple's current valuation is slightly above historical averages (P/E ratio of 31.2 vs 5-year average of 28.5)",
                   "Your portfolio already has sufficient technology exposure (32% allocation)",
-                  "Your near-term goal of saving for a house down payment suggests maintaining liquidity",
-                  "Apple's environmental initiatives align well with your sustainability preferences (72% match)",
+                  "Your near-term goal of saving for a house down payment suggests increasing liquidity",
+                  "Selling AAPL is a tax efficient choice as it allows you to reduce your tax liability through loss harvesting.",
                 ],
                 alternatives: [
                   "Consider dollar-cost averaging with smaller purchases over time",
