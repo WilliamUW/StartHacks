@@ -332,15 +332,10 @@ export default function Home() {
         const transcript = event.results[0][0].transcript;
         setVoiceMode("processing");
         
-        // Process the voice input
+        // Process the voice input and reset voice mode
         setTimeout(() => {
           handleUserMessage(transcript);
-          setVoiceMode("speaking");
-
-          // Simulate AI speaking for 2 seconds
-          setTimeout(() => {
-            setVoiceMode("idle");
-          }, 2000);
+          setVoiceMode("idle");
         }, 500);
       };
 
@@ -351,7 +346,7 @@ export default function Home() {
 
       recognition.onend = () => {
         // Only set to idle if we're still in listening mode
-        // This prevents overriding the "processing" or "speaking" states
+        // This prevents overriding the "processing" state
         if (voiceMode === "listening") {
           setVoiceMode("idle");
         }
