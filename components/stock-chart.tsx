@@ -8,7 +8,7 @@ interface StockChartProps {
   height?: number
 }
 
-export default function StockChart({ symbol, timeframe = "1M", height = 300 }: StockChartProps) {
+export default function StockChart({ symbol, timeframe = "1Y", height = 300 }: StockChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height })
