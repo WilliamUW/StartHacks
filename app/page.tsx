@@ -1438,13 +1438,13 @@ export default function Home() {
               sender: "agent",
               timestamp: new Date(),
               data: {
-                recommendation: "Hold",
+                recommendation: "Sell",
                 confidence: "Medium",
                 reasoning: [
                   "Apple's current valuation is slightly above historical averages (P/E ratio of 31.2 vs 5-year average of 28.5)",
                   "Your portfolio already has sufficient technology exposure (32% allocation)",
-                  "Your near-term goal of saving for a house down payment suggests maintaining liquidity",
-                  "Apple's environmental initiatives align well with your sustainability preferences (72% match)",
+                  "Your near-term goal of saving for a house down payment suggests increasing liquidity",
+                  "Selling AAPL is a tax efficient choice as it allows you to reduce your tax liability through loss harvesting.",
                 ],
                 alternatives: [
                   "Consider dollar-cost averaging with smaller purchases over time",
