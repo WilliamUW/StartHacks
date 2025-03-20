@@ -25,13 +25,13 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import NotificationCenter from "@/components/notification-center"
+import NotificationCenter from "@/components/notification-center";
 import PortfolioChart from "@/components/portfolio-chart";
 import PortfolioPieChart from "@/components/portfolio-pie-chart";
 import type React from "react";
@@ -311,9 +311,10 @@ export default function Home() {
   const toggleVoiceMode = useCallback(() => {
     if (voiceMode === "idle") {
       // Initialize speech recognition
-      const SpeechRecognition = (window as SpeechRecognitionWindow).SpeechRecognition || 
-                               (window as SpeechRecognitionWindow).webkitSpeechRecognition;
-      
+      const SpeechRecognition =
+        (window as SpeechRecognitionWindow).SpeechRecognition ||
+        (window as SpeechRecognitionWindow).webkitSpeechRecognition;
+
       if (!SpeechRecognition) {
         alert("Speech recognition is not supported in this browser.");
         return;
@@ -322,7 +323,7 @@ export default function Home() {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      recognition.lang = "en-US";
 
       recognition.onstart = () => {
         setVoiceMode("listening");
@@ -331,7 +332,7 @@ export default function Home() {
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         setVoiceMode("processing");
-        
+
         // Process the voice input and reset voice mode
         setTimeout(() => {
           handleUserMessage(transcript);
@@ -340,7 +341,7 @@ export default function Home() {
       };
 
       recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error("Speech recognition error:", event.error);
         setVoiceMode("idle");
       };
 
@@ -377,18 +378,18 @@ export default function Home() {
   const speak = (text: string) => {
     // Check if speech synthesis is supported
     if (!window.speechSynthesis) {
-      console.error('Speech synthesis not supported');
+      console.error("Speech synthesis not supported");
       return;
     }
 
     // Create utterance
     const utterance = new SpeechSynthesisUtterance(text);
-    
+
     // Optional: Configure voice settings
-    utterance.rate = 1.0;  // Speed of speech
+    utterance.rate = 1.0; // Speed of speech
     utterance.pitch = 1.0; // Pitch of voice
     utterance.volume = 1.0; // Volume
-    
+
     // Optional: Select a voice (uncomment if you want to use a specific voice)
     // const voices = window.speechSynthesis.getVoices();
     // utterance.voice = voices[0]; // Select the first available voice
@@ -426,20 +427,13 @@ export default function Home() {
     const lowerMessage = message.toLowerCase();
 
     // Check for commands
-    if (
- 
-      lowerMessage.includes("jane")
-    ) {
+    if (lowerMessage.includes("jane")) {
       handleClientInfoRequest();
-    } else if (
-  
-      lowerMessage.includes("portfolio")
-    ) {
+    } else if (lowerMessage.includes("portfolio")) {
       handlePortfolioRequest();
     } else if (
-      lowerMessage.includes("analyze") || lowerMessage.includes("/stock") && (
       lowerMessage.includes("aapl") ||
-      lowerMessage.includes("apple"))
+      lowerMessage.includes("apple")
     ) {
       handleStockInfoRequest();
     } else if (
@@ -455,21 +449,20 @@ export default function Home() {
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/);
       const clientName = clientMatch ? clientMatch[1].trim() : "Jane Appleseed"; // Default to Jane Appleseed if no client specified
       handlePowerPointRequest(clientName);
-    }  else if (
+    } else if (
       lowerMessage.includes("buy") ||
       lowerMessage.includes("invest") ||
       lowerMessage.includes("should i")
     ) {
       handleFinancialAdviceRequest();
     } else if (lowerMessage.includes("sell")) {
-      handleClientTransactionRequest("Shares of AAPL has been sold")
-
+      handleClientTransactionRequest("Shares of AAPL has been sold");
     } else {
       // Generic response
-      const response = await fetch('/api/llm', {
-        method: 'POST',
+      const response = await fetch("/api/llm", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           naturalLanguage: lowerMessage,
@@ -477,13 +470,13 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch stock data');
+        throw new Error("Failed to fetch stock data");
       }
       const data = await response.json();
       if (data["endpoint"] != null) {
         if (data["endpoint"].includes("client")) {
           handleClientInfoRequest();
-        } else if (data["endpoint"].includes("stock")){
+        } else if (data["endpoint"].includes("stock")) {
           handleStockInfoRequest();
         } else {
           handleClientTransactionRequest(data["args"]);
@@ -509,7 +502,7 @@ export default function Home() {
   const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-  const handleClientTransactionRequest = async (transactionString : string) => {
+  const handleClientTransactionRequest = async (transactionString: string) => {
     // Create the initial thinking message
     const thinkingMessage: Message = {
       id: uuidv4(),
@@ -570,8 +563,7 @@ export default function Home() {
               id: uuidv4(),
               content: "Scheduled transaction",
               status: "complete",
-              result:
-                transactionString,
+              result: transactionString,
             },
           ],
         };
@@ -668,7 +660,8 @@ export default function Home() {
     // Add the final client info message
     const clientInfoMessage: Message = {
       id: uuidv4(),
-      content: "Here's Jane Appleseed's client information and portfolio overview:",
+      content:
+        "Here's Jane Appleseed's client information and portfolio overview:",
       type: "client-info",
       sender: "agent",
       timestamp: new Date(),
@@ -1013,7 +1006,8 @@ export default function Home() {
           setTimeout(() => {
             const portfolioInfoMessage: Message = {
               id: uuidv4(),
-              content: "Here's Jane Appleseed's portfolio performance analysis:",
+              content:
+                "Here's Jane Appleseed's portfolio performance analysis:",
               type: "portfolio-info",
               sender: "agent",
               timestamp: new Date(),
@@ -1193,7 +1187,8 @@ export default function Home() {
           setTimeout(() => {
             const excelPreviewMessage: Message = {
               id: uuidv4(),
-              content: "I've generated a comprehensive Excel report for Jane Appleseed's portfolio:",
+              content:
+                "I've generated a comprehensive Excel report for Jane Appleseed's portfolio:",
               type: "excel-preview",
               sender: "agent",
               timestamp: new Date(),
@@ -1433,7 +1428,8 @@ export default function Home() {
           setTimeout(() => {
             const financialAdviceMessage: Message = {
               id: uuidv4(),
-              content: "Based on my analysis, here's my recommendation regarding Apple stock (AAPL):",
+              content:
+                "Based on my analysis, here's my recommendation regarding Apple stock (AAPL):",
               type: "financial-advice",
               sender: "agent",
               timestamp: new Date(),
@@ -1865,14 +1861,15 @@ export default function Home() {
                             className="flex items-center p-2 hover:bg-muted/30 rounded-md text-sm"
                           >
                             <div
-                              className={`w-3 h-3 rounded-sm mr-2 ${index === 0
-                                ? "bg-green-500"
-                                : index === 1
+                              className={`w-3 h-3 rounded-sm mr-2 ${
+                                index === 0
+                                  ? "bg-green-500"
+                                  : index === 1
                                   ? "bg-blue-500"
                                   : index === 2
-                                    ? "bg-purple-500"
-                                    : "bg-amber-500"
-                                }`}
+                                  ? "bg-purple-500"
+                                  : "bg-amber-500"
+                              }`}
                             ></div>
                             {sheet}
                           </div>
@@ -2151,16 +2148,23 @@ export default function Home() {
                 size="lg"
                 className={cn(
                   "h-14 px-6 rounded-full transition-all duration-150 shadow-lg",
-                  isSpeechRecognitionSupported() 
+                  isSpeechRecognitionSupported()
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
-                onClick={isSpeechRecognitionSupported() ? toggleVoiceMode : () => alert("Speech recognition is not supported in this browser.")}
+                onClick={
+                  isSpeechRecognitionSupported()
+                    ? toggleVoiceMode
+                    : () =>
+                        alert(
+                          "Speech recognition is not supported in this browser."
+                        )
+                }
               >
                 <div className="flex items-center">
                   <Mic className="h-5 w-5" />
                   <span className="ml-2 font-medium">
-                    {!isSpeechRecognitionSupported() 
+                    {!isSpeechRecognitionSupported()
                       ? "Speech not supported"
                       : voiceMode === "idle"
                       ? "Speak to Terminal Six"
@@ -2288,14 +2292,16 @@ export default function Home() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex ${
+                  message.sender === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
-                  className={`max-w-[90%] rounded-lg p-4 ${message.sender === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border"
-                    }`}
+                  className={`max-w-[90%] rounded-lg p-4 ${
+                    message.sender === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card border border-border"
+                  }`}
                 >
                   {message.sender === "agent" && (
                     <div className="flex items-center mb-2">
@@ -2307,10 +2313,11 @@ export default function Home() {
                   {renderMessageContent(message)}
 
                   <div
-                    className={`text-xs mt-2 ${message.sender === "user"
-                      ? "text-primary-foreground/70"
-                      : "text-muted-foreground"
-                      }`}
+                    className={`text-xs mt-2 ${
+                      message.sender === "user"
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground"
+                    }`}
                   >
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -2379,10 +2386,10 @@ export default function Home() {
                         {voiceMode === "idle"
                           ? "Speak to Terminal Six"
                           : voiceMode === "listening"
-                            ? "Listening..."
-                            : voiceMode === "processing"
-                              ? "Processing..."
-                              : "Speaking..."}
+                          ? "Listening..."
+                          : voiceMode === "processing"
+                          ? "Processing..."
+                          : "Speaking..."}
                       </span>
                     </div>
                   </Button>
