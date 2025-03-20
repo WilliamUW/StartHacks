@@ -4,7 +4,7 @@ const baseURL = "https://idchat-api-containerapp01-dev.orangepebble-16234c4b.swi
 const llmFunctionDefinition = `
         {
         "name": "determine_function",
-        "description": "Given a natural language input, determine which of the two functions should be called: /client or /stock. Output should be formatted in JSON: {'endpoint': *selected endpoint*, 'args': *argument like name or ticker*}. If asked 'analyze APPLE' you'd give {'endpoint': '/stock', 'args': 'APPLE'}",
+        "description": "Given a natural language input, determine which of the two functions should be called: /client or /stock. Output should be formatted in JSON: {'endpoint': *selected endpoint*, 'args': *argument like name or ticker*}. If asked 'analyze APPLE' you'd give {'endpoint': '\stock', 'args': 'APPLE'}. If natural language cannot be sorted return {'endpoint': null, 'args': null}",
         "strict": true,
         "parameters": {
             "type": "object",
@@ -18,7 +18,8 @@ const llmFunctionDefinition = `
             }
             },
             "additionalProperties": false
-        }}`;
+        }
+        }`;
 
 async function getFunctionFromNL(nlInput : string) {
     try {
