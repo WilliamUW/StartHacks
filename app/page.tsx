@@ -373,8 +373,36 @@ export default function Home() {
     return <Mic className="h-5 w-5" />;
   };
 
+  // Add this function near the top of the component, after the state declarations
+  const speak = (text: string) => {
+    // Check if speech synthesis is supported
+    if (!window.speechSynthesis) {
+      console.error('Speech synthesis not supported');
+      return;
+    }
+
+    // Create utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Optional: Configure voice settings
+    utterance.rate = 1.0;  // Speed of speech
+    utterance.pitch = 1.0; // Pitch of voice
+    utterance.volume = 1.0; // Volume
+    
+    // Optional: Select a voice (uncomment if you want to use a specific voice)
+    // const voices = window.speechSynthesis.getVoices();
+    // utterance.voice = voices[0]; // Select the first available voice
+
+    // Speak the text
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Update the handleUserMessage function
   const handleUserMessage = (message: string) => {
     if (!message.trim()) return;
+
+    // Speak acknowledgment
+    speak(`Processing your query ${message}`);
 
     // Add user message
     const userMessage: Message = {
