@@ -1,10 +1,8 @@
 "use client";
 
-import type React from "react"
 import NotificationCenter from "@/components/notification-center"
 
 import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
 import {
   AlertCircle,
   BarChart4,
@@ -30,7 +28,6 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1709,12 +1706,12 @@ export default function Home() {
                           >
                             <div
                               className={`w-3 h-3 rounded-sm mr-2 ${index === 0
-                                  ? "bg-green-500"
-                                  : index === 1
-                                    ? "bg-blue-500"
-                                    : index === 2
-                                      ? "bg-purple-500"
-                                      : "bg-amber-500"
+                                ? "bg-green-500"
+                                : index === 1
+                                  ? "bg-blue-500"
+                                  : index === 2
+                                    ? "bg-purple-500"
+                                    : "bg-amber-500"
                                 }`}
                             ></div>
                             {sheet}
@@ -2128,8 +2125,8 @@ export default function Home() {
               >
                 <div
                   className={`max-w-[90%] rounded-lg p-4 ${message.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card border border-border"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card border border-border"
                     }`}
                 >
                   {message.sender === "agent" && (
@@ -2143,8 +2140,8 @@ export default function Home() {
 
                   <div
                     className={`text-xs mt-2 ${message.sender === "user"
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground"
+                      ? "text-primary-foreground/70"
+                      : "text-muted-foreground"
                       }`}
                   >
                     {message.timestamp.toLocaleTimeString([], {
