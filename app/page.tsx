@@ -1,43 +1,43 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
 import {
-  Mic,
-  MicOff,
-  Volume2,
-  Sparkles,
-  Send,
-  Loader2,
-  X,
-  Maximize2,
-  Minimize2,
-  ChevronRight,
+  AlertCircle,
   BarChart4,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Clock,
   FileSpreadsheet,
   FileText,
+  Loader2,
+  Maximize2,
+  Mic,
+  MicOff,
+  Minimize2,
   PieChart,
-  AlertCircle,
+  Send,
+  Sparkles,
   TrendingUp,
-  Clock,
-  Check,
+  Volume2,
+  X,
   Zap,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useRef, useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
-import StockChart from "@/components/stock-chart"
+import { Input } from "@/components/ui/input"
 import PortfolioChart from "@/components/portfolio-chart"
 import PortfolioPieChart from "@/components/portfolio-pie-chart"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import type React from "react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import StockChart from "@/components/stock-chart"
+import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 import { v4 as uuidv4 } from 'uuid'
 
 type MessageType =
@@ -1330,26 +1330,7 @@ export default function Home() {
 
             <Card className="overflow-hidden">
               <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-bold">{message.data.symbol}</h3>
-                    <p className="text-sm text-muted-foreground">{message.data.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold">${message.data.price.toFixed(2)}</div>
-                    <Badge
-                      variant="outline"
-                      className={
-                        message.data.change >= 0 ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
-                      }
-                    >
-                      {message.data.change >= 0 ? "+" : ""}
-                      {message.data.change.toFixed(2)} ({message.data.changePercent.toFixed(2)}%)
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="mt-4 h-[200px]">
+                <div className="h-[270px]">
                   <StockChart symbol={message.data.symbol} height={200} />
                 </div>
               </div>
