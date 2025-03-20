@@ -427,16 +427,15 @@ export default function Home() {
     const lowerMessage = message.toLowerCase();
 
     // Check for commands
-    if (lowerMessage.includes("jane")) {
-      handleClientInfoRequest();
-    } else if (lowerMessage.includes("portfolio")) {
+    if (lowerMessage.includes("portfolio")) {
       handlePortfolioRequest();
     } else if (
-      lowerMessage.includes("aapl") ||
-      lowerMessage.includes("apple")
+      lowerMessage.includes("buy") ||
+      lowerMessage.includes("invest") ||
+      lowerMessage.includes("should i")
     ) {
-      handleStockInfoRequest();
-    } else if (
+      handleFinancialAdviceRequest();
+    }  else if (
       lowerMessage.startsWith("/create excel") ||
       lowerMessage.includes("excel")
     ) {
@@ -449,16 +448,17 @@ export default function Home() {
       const clientMatch = message.match(/\/create powerpoint\s+([A-Za-z\s]+)/);
       const clientName = clientMatch ? clientMatch[1].trim() : "Jane Appleseed"; // Default to Jane Appleseed if no client specified
       handlePowerPointRequest(clientName);
-    } else if (
-      lowerMessage.includes("buy") ||
-      lowerMessage.includes("invest") ||
-      lowerMessage.includes("should i")
-    ) {
-      handleFinancialAdviceRequest();
     } else if (lowerMessage.includes("sell")) {
-      handleClientTransactionRequest("Shares of AAPL has been sold");
+      handleClientTransactionRequest("207.38 AAPL Shares ($50,000) has been sold");
     } else if (lowerMessage.includes("transfer")) {
-      handleClientTransactionRequest("Shares of AAPL have been transfered");
+      handleClientTransactionRequest("$50,000 has been transfered to Jane's checking account ending in 0836.");
+    } else if (
+      lowerMessage.includes("aapl") ||
+      lowerMessage.includes("apple")
+    ) {
+      handleStockInfoRequest();
+    } else if (lowerMessage.includes("jane")) {
+      handleClientInfoRequest();
     } else {
       // Generic response
       const response = await fetch("/api/llm", {
